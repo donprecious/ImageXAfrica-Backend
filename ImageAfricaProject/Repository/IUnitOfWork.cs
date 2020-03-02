@@ -1,0 +1,22 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using ImageAfricaProject.Data;
+using ImageAfricaProject.Repository.Generic;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+namespace ImageAfricaProject.Repository
+{
+    public interface IUnitOfWork
+    {
+        /// <returns>The number of objects in an Added, Modified, or Deleted state</returns>
+        int Commit();
+        /// <returns>The number of objects in an Added, Modified, or Deleted state asynchronously</returns>
+        Task<int> CommitAsync();
+        /// <returns>Repository</returns>
+        IGenericRepository<TEntity> GetRepository<TEntity>()
+            where TEntity : class;
+    }
+}
