@@ -19,6 +19,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using  AutoMapper;
+using CrExtApiCore.Factories;
+using Factories;
+using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
+using Providers;
 
 namespace ImageAfricaProject
 {
@@ -37,7 +43,7 @@ namespace ImageAfricaProject
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
-
+            
             services.AddIdentity<ApplicationUser,ApplicationRole>(options =>
                 {
                     // Password settings.
@@ -56,33 +62,63 @@ namespace ImageAfricaProject
 
             services.AddControllersWithViews();
             services.AddRazorPages();
-
+            services.AddControllers().AddNewtonsoftJson(options => {
+                options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
+                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            }).AddXmlSerializerFormatters(); 
+            services.AddScoped<IJwtFactory, JwtFactory>();
 
             var appSettingsSection = Configuration.GetSection("AppSettings");
             services.Configure<AppSettings>(appSettingsSection);
 
             var appSettings = appSettingsSection.Get<AppSettings>();
-            var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+            var key = Encoding.ASCII.GetBytes(appSettings.Secret); 
+
+            var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions));
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)],
+
+                ValidateAudience = true,
+                ValidAudience = jwtAppSettingOptions[nameof(JwtIssuerOptions.Audience)],
+
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+
+                RequireExpirationTime = false,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+            services.Configure<JwtIssuerOptions>(options =>
+            {
+                options.Issuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)];
+                options.Audience = jwtAppSettingOptions[nameof(JwtIssuerOptions.Audience)];
+                options.SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
+            });
+          
             services.AddAuthentication(x =>
                 {
                     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                     x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 })
-                .AddJwtBearer(x =>
+                .AddJwtBearer(configureOptions =>
                 {
-                    x.RequireHttpsMetadata = false;
-                    x.SaveToken = true;
-                    x.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(key),
-                        ValidateIssuer = false,
-                        ValidateAudience = false
-                    };
+                    configureOptions.ClaimsIssuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)];
+                    configureOptions.TokenValidationParameters = tokenValidationParameters;
+                    configureOptions.SaveToken = true;
                 }); 
 
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My ImageXAfrica API", Version = "v1" });
+            });
+
+            services.AddAutoMapper(typeof(Startup));
+
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            services.AddTransient<IUnitOfWork, UnitOfWork>(); 
+            services.AddScoped<IUserRepository, UserRepository>();
+            //services.AddTransient<IUnitOfWork, UnitOfWork>(); 
 
         }
 
@@ -113,6 +149,18 @@ namespace ImageAfricaProject
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                c.RoutePrefix = string.Empty;
+            });
+
 
             app.UseEndpoints(endpoints =>
             {

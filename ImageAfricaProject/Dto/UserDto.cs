@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 
-namespace ImageAfricaProject.Entities
+namespace ImageAfricaProject.Dto
 {
-    public class ApplicationUser: IdentityUser
-    { 
+    public class UserDto
+    {
+        public  string Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string ProfileImageUrl { get; set; }
+        public string Email { get; set; }
     }
 }
