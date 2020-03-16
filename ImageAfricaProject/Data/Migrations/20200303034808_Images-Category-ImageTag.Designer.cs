@@ -4,14 +4,16 @@ using ImageAfricaProject.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ImageAfricaProject.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200303034808_Images-Category-ImageTag")]
+    partial class ImagesCategoryImageTag
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -118,6 +120,22 @@ namespace ImageAfricaProject.Data.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "c6e56395-b1e1-494c-8294-8e78d484ff50",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "d77debd3-d492-407b-899c-efc5ffd3f526",
+                            Email = "user@gmail.com",
+                            EmailConfirmed = false,
+                            LockoutEnabled = false,
+                            PasswordHash = "AQAAAAEAACcQAAAAEOY1uQYJNd1omPOBEoyg6qvhjfcz9KGGzFWdu27FfkXakYxF6qwkhwdfeqnx56jo6A==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "66b8f264-e6f0-4fe3-b8cb-fc57da74ba29",
+                            TwoFactorEnabled = false,
+                            UserName = "user@gmail.com"
+                        });
                 });
 
             modelBuilder.Entity("ImageAfricaProject.Entities.Category", b =>
@@ -157,74 +175,48 @@ namespace ImageAfricaProject.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
-                });
 
-            modelBuilder.Entity("ImageAfricaProject.Entities.ContentCollection", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatorUserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DeleterUserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ImageId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastModifierUserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ImageId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ContentCollections");
-                });
-
-            modelBuilder.Entity("ImageAfricaProject.Entities.ImageLike", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ImageId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ImageId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ImageLikes");
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreationTime = new DateTime(2020, 3, 3, 3, 48, 7, 591, DateTimeKind.Utc).AddTicks(1798),
+                            CreatorUserId = "c6e56395-b1e1-494c-8294-8e78d484ff50",
+                            IsDeleted = false,
+                            Name = "Birthday"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreationTime = new DateTime(2020, 3, 3, 3, 48, 7, 591, DateTimeKind.Utc).AddTicks(4463),
+                            CreatorUserId = "c6e56395-b1e1-494c-8294-8e78d484ff50",
+                            IsDeleted = false,
+                            Name = "Entertainment"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreationTime = new DateTime(2020, 3, 3, 3, 48, 7, 591, DateTimeKind.Utc).AddTicks(4517),
+                            CreatorUserId = "c6e56395-b1e1-494c-8294-8e78d484ff50",
+                            IsDeleted = false,
+                            Name = "Celebration"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreationTime = new DateTime(2020, 3, 3, 3, 48, 7, 591, DateTimeKind.Utc).AddTicks(4519),
+                            CreatorUserId = "c6e56395-b1e1-494c-8294-8e78d484ff50",
+                            IsDeleted = false,
+                            Name = "Wild Life"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CreationTime = new DateTime(2020, 3, 3, 3, 48, 7, 591, DateTimeKind.Utc).AddTicks(4521),
+                            CreatorUserId = "c6e56395-b1e1-494c-8294-8e78d484ff50",
+                            IsDeleted = false,
+                            Name = "Animals"
+                        });
                 });
 
             modelBuilder.Entity("ImageAfricaProject.Entities.ImageTag", b =>
@@ -268,26 +260,56 @@ namespace ImageAfricaProject.Data.Migrations
                     b.HasIndex("TagId");
 
                     b.ToTable("ImageTags");
-                });
 
-            modelBuilder.Entity("ImageAfricaProject.Entities.ImageView", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ImageId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ImageId");
-
-                    b.ToTable("ImageViews");
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreationTime = new DateTime(2020, 3, 3, 3, 48, 7, 592, DateTimeKind.Utc).AddTicks(2499),
+                            ImageId = 1,
+                            IsDeleted = false,
+                            TagId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreationTime = new DateTime(2020, 3, 3, 3, 48, 7, 592, DateTimeKind.Utc).AddTicks(3747),
+                            ImageId = 1,
+                            IsDeleted = false,
+                            TagId = 3
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreationTime = new DateTime(2020, 3, 3, 3, 48, 7, 592, DateTimeKind.Utc).AddTicks(3779),
+                            ImageId = 1,
+                            IsDeleted = false,
+                            TagId = 4
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreationTime = new DateTime(2020, 3, 3, 3, 48, 7, 592, DateTimeKind.Utc).AddTicks(3781),
+                            ImageId = 2,
+                            IsDeleted = false,
+                            TagId = 1
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CreationTime = new DateTime(2020, 3, 3, 3, 48, 7, 592, DateTimeKind.Utc).AddTicks(3783),
+                            ImageId = 2,
+                            IsDeleted = false,
+                            TagId = 4
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CreationTime = new DateTime(2020, 3, 3, 3, 48, 7, 592, DateTimeKind.Utc).AddTicks(3790),
+                            ImageId = 3,
+                            IsDeleted = false,
+                            TagId = 2
+                        });
                 });
 
             modelBuilder.Entity("ImageAfricaProject.Entities.Images", b =>
@@ -349,6 +371,44 @@ namespace ImageAfricaProject.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Images");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CategoryId = 1,
+                            CreationTime = new DateTime(2020, 3, 3, 3, 48, 7, 591, DateTimeKind.Utc).AddTicks(8418),
+                            GeoLat = 0.0,
+                            GeoLog = 0.0,
+                            ImageUrl = "https://images.pexels.com/photos/2774197/pexels-photo-2774197.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260",
+                            IsDeleted = false,
+                            Name = "Woman Sitting on a Sofa Chair in a Room",
+                            UserId = "c6e56395-b1e1-494c-8294-8e78d484ff50"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CategoryId = 2,
+                            CreationTime = new DateTime(2020, 3, 3, 3, 48, 7, 592, DateTimeKind.Utc).AddTicks(1052),
+                            GeoLat = 0.0,
+                            GeoLog = 0.0,
+                            ImageUrl = "https://images.pexels.com/photos/1990360/pexels-photo-1990360.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260",
+                            IsDeleted = false,
+                            Name = "Pretty Woman",
+                            UserId = "c6e56395-b1e1-494c-8294-8e78d484ff50"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CategoryId = 3,
+                            CreationTime = new DateTime(2020, 3, 3, 3, 48, 7, 592, DateTimeKind.Utc).AddTicks(1120),
+                            GeoLat = 0.0,
+                            GeoLog = 0.0,
+                            ImageUrl = "https://images.pexels.com/photos/3115635/pexels-photo-3115635.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+                            IsDeleted = false,
+                            Name = "Far Lady Woman",
+                            UserId = "c6e56395-b1e1-494c-8294-8e78d484ff50"
+                        });
                 });
 
             modelBuilder.Entity("ImageAfricaProject.Entities.Tag", b =>
@@ -388,6 +448,36 @@ namespace ImageAfricaProject.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tags");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreationTime = new DateTime(2020, 3, 3, 3, 48, 7, 591, DateTimeKind.Utc).AddTicks(6321),
+                            IsDeleted = false,
+                            Name = "Africa"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreationTime = new DateTime(2020, 3, 3, 3, 48, 7, 591, DateTimeKind.Utc).AddTicks(7033),
+                            IsDeleted = false,
+                            Name = "International"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreationTime = new DateTime(2020, 3, 3, 3, 48, 7, 591, DateTimeKind.Utc).AddTicks(7050),
+                            IsDeleted = false,
+                            Name = "Simple"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreationTime = new DateTime(2020, 3, 3, 3, 48, 7, 591, DateTimeKind.Utc).AddTicks(7052),
+                            IsDeleted = false,
+                            Name = "Simple"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -494,32 +584,6 @@ namespace ImageAfricaProject.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("ImageAfricaProject.Entities.ContentCollection", b =>
-                {
-                    b.HasOne("ImageAfricaProject.Entities.Images", "Image")
-                        .WithMany()
-                        .HasForeignKey("ImageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ImageAfricaProject.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-                });
-
-            modelBuilder.Entity("ImageAfricaProject.Entities.ImageLike", b =>
-                {
-                    b.HasOne("ImageAfricaProject.Entities.Images", "Image")
-                        .WithMany()
-                        .HasForeignKey("ImageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ImageAfricaProject.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-                });
-
             modelBuilder.Entity("ImageAfricaProject.Entities.ImageTag", b =>
                 {
                     b.HasOne("ImageAfricaProject.Entities.Images", "Image")
@@ -531,15 +595,6 @@ namespace ImageAfricaProject.Data.Migrations
                     b.HasOne("ImageAfricaProject.Entities.Tag", "Tag")
                         .WithMany()
                         .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ImageAfricaProject.Entities.ImageView", b =>
-                {
-                    b.HasOne("ImageAfricaProject.Entities.Images", "Image")
-                        .WithMany()
-                        .HasForeignKey("ImageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

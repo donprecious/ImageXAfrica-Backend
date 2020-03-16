@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ImageAfricaProject.Dto;
+using ImageAfricaProject.Data;
 using ImageAfricaProject.Entities;
 using ImageAfricaProject.Repository.Generic;
 
 namespace ImageAfricaProject.Repository
 {
-    public interface IUserRepository : IGenericRepository<ApplicationUser>
+    public class CategoryRepository :  GenericRepository<Category>, ICategoryRepository
     {
-        ApplicationUser CreateNewUser(UserDto user);
-        Task<ApplicationUser> GetCurrentUserAsync();
+        public CategoryRepository(ApplicationDbContext dbContext) : base(dbContext)
+        {
+
+        }
     }
 }

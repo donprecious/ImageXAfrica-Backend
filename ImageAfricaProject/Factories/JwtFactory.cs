@@ -64,6 +64,8 @@ namespace CrExtApiCore.Factories
            var claimsIdentity = new ClaimsIdentity(new GenericIdentity(userName, "Token"), new[]
             {
                 new Claim(Helpers.Constants.Strings.JwtClaimIdentifiers.Id, id),
+                new Claim(ClaimTypes.Name, userName),
+
                 new Claim(Helpers.Constants.Strings.JwtClaimIdentifiers.Rol, Helpers.Constants.Strings.JwtClaims.ApiAccess), 
                
             });

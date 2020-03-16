@@ -22,6 +22,8 @@ using Microsoft.IdentityModel.Tokens;
 using  AutoMapper;
 using CrExtApiCore.Factories;
 using Factories;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Providers;
@@ -63,7 +65,7 @@ namespace ImageAfricaProject
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddControllers().AddNewtonsoftJson(options => {
-                options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
+                //options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.ca();
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             }).AddXmlSerializerFormatters(); 
             services.AddScoped<IJwtFactory, JwtFactory>();
@@ -88,7 +90,8 @@ namespace ImageAfricaProject
 
                 RequireExpirationTime = false,
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
+                ClockSkew = TimeSpan.Zero,
+                
             };
             services.Configure<JwtIssuerOptions>(options =>
             {
@@ -96,7 +99,6 @@ namespace ImageAfricaProject
                 options.Audience = jwtAppSettingOptions[nameof(JwtIssuerOptions.Audience)];
                 options.SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
             });
-          
             services.AddAuthentication(x =>
                 {
                     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -115,9 +117,17 @@ namespace ImageAfricaProject
             });
 
             services.AddAutoMapper(typeof(Startup));
-
+           
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IImageRepository, ImageRepository>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IImageTagRepository, ImageTagRepository>();
+            services.AddScoped<ITagRepository, TagRepository>();
+            services.AddScoped<IContentCollectionRepository, ContentCollectionRepository>();
+            //services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddHttpContextAccessor();
+
             //services.AddTransient<IUnitOfWork, UnitOfWork>(); 
 
         }

@@ -4,6 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using ImageAfricaProject.Dto;
+using ImageAfricaProject.Dto.category;
+using ImageAfricaProject.Dto.image;
+using ImageAfricaProject.Dto.ImageTag;
 using ImageAfricaProject.Entities;
 
 namespace ImageAfricaProject.Mapper
@@ -18,6 +21,17 @@ namespace ImageAfricaProject.Mapper
             CreateMap<UserDto, ApplicationUser>();
             CreateMap<CreateUserDto, ApplicationUser>();
             CreateMap<ApplicationUser, UserAuthDto>();
+
+            CreateMap<Images, GetImageDto>();
+            CreateMap<Images, ImageDto>();
+            CreateMap<CreateImageDto, Images>();
+
+            CreateMap<Category, CategoryDto>();
+
+            CreateMap<ImageTag, ImageTagDto>();
+         
+            CreateMap<Tag, TagDto>();
+            CreateMap<Tag, TagDto>();
         }
     }
 }

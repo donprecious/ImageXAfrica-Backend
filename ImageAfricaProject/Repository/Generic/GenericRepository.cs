@@ -11,14 +11,14 @@ namespace ImageAfricaProject.Repository.Generic
     public class GenericRepository<TEntity> : IGenericRepository<TEntity>
         where TEntity : class
     {
-        private readonly ApplicationDbContext _dbContext;
+        public readonly ApplicationDbContext _dbContext;
 
         public GenericRepository(ApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        public IQueryable<TEntity> GetAll()
+        public  IQueryable<TEntity> GetAll()
         {
             return _dbContext.Set<TEntity>().AsNoTracking();
 
@@ -29,12 +29,22 @@ namespace ImageAfricaProject.Repository.Generic
             return await _dbContext.Set<TEntity>()
                 .FindAsync(id);
         }
+        public  DbSet<TEntity> Query()
+        {
+            return _dbContext.Set<TEntity>();
+
+        }
+
+      
 
         public async Task Create(TEntity entity)
         {
             await _dbContext.Set<TEntity>().AddAsync(entity);
         }
-
+        public async Task CreateMany(List<TEntity> entity)
+        {
+            await _dbContext.Set<TEntity>().AddRangeAsync(entity);
+        }
         public async Task Update(TEntity entity)
         {
             

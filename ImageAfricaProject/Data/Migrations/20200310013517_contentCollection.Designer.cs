@@ -4,14 +4,16 @@ using ImageAfricaProject.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ImageAfricaProject.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200310013517_contentCollection")]
+    partial class contentCollection
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -202,31 +204,6 @@ namespace ImageAfricaProject.Data.Migrations
                     b.ToTable("ContentCollections");
                 });
 
-            modelBuilder.Entity("ImageAfricaProject.Entities.ImageLike", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ImageId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ImageId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ImageLikes");
-                });
-
             modelBuilder.Entity("ImageAfricaProject.Entities.ImageTag", b =>
                 {
                     b.Property<int>("Id")
@@ -268,26 +245,6 @@ namespace ImageAfricaProject.Data.Migrations
                     b.HasIndex("TagId");
 
                     b.ToTable("ImageTags");
-                });
-
-            modelBuilder.Entity("ImageAfricaProject.Entities.ImageView", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ImageId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ImageId");
-
-                    b.ToTable("ImageViews");
                 });
 
             modelBuilder.Entity("ImageAfricaProject.Entities.Images", b =>
@@ -507,19 +464,6 @@ namespace ImageAfricaProject.Data.Migrations
                         .HasForeignKey("UserId");
                 });
 
-            modelBuilder.Entity("ImageAfricaProject.Entities.ImageLike", b =>
-                {
-                    b.HasOne("ImageAfricaProject.Entities.Images", "Image")
-                        .WithMany()
-                        .HasForeignKey("ImageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ImageAfricaProject.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-                });
-
             modelBuilder.Entity("ImageAfricaProject.Entities.ImageTag", b =>
                 {
                     b.HasOne("ImageAfricaProject.Entities.Images", "Image")
@@ -531,15 +475,6 @@ namespace ImageAfricaProject.Data.Migrations
                     b.HasOne("ImageAfricaProject.Entities.Tag", "Tag")
                         .WithMany()
                         .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ImageAfricaProject.Entities.ImageView", b =>
-                {
-                    b.HasOne("ImageAfricaProject.Entities.Images", "Image")
-                        .WithMany()
-                        .HasForeignKey("ImageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

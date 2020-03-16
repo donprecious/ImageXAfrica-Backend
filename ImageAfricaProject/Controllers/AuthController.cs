@@ -9,6 +9,8 @@ using Helpers;
 using ImageAfricaProject.Dto;
 using ImageAfricaProject.Entities;
 using ImageAfricaProject.Helpers;
+using ImageAfricaProject.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -25,17 +27,19 @@ namespace ImageAfricaProject.Controllers
     public class AuthController : ControllerBase
     {
         private UserManager<ApplicationUser> _userManager;
+        private readonly IUserRepository _userRepository;
         private SignInManager<ApplicationUser> _signInManager;
         private readonly IJwtFactory _jwtFactory;
         private readonly JsonSerializerSettings _serializerSettings;
         private readonly JwtIssuerOptions _jwtOptions;
         private readonly IMapper _mapper;
-        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IJwtFactory jwtFactory,  IOptions<JwtIssuerOptions> jwtOptions, IMapper mapper)
+        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IJwtFactory jwtFactory,  IOptions<JwtIssuerOptions> jwtOptions, IMapper mapper, IUserRepository userRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _jwtFactory = jwtFactory;
             _mapper = mapper;
+            _userRepository = userRepository;
             _serializerSettings = new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented
@@ -84,8 +88,7 @@ namespace ImageAfricaProject.Controllers
                         return await _jwtFactory.GenerateClaimsIdentity(userName,userToVerify.Id);
                     }
                 }
-            }
-
+            }r
             // Credentials are invalid, or account doesn't exist
             return await Task.FromResult<ClaimsIdentity>(null);
 
@@ -113,5 +116,13 @@ namespace ImageAfricaProject.Controllers
             return StatusCode(500, "server error");
         }
 
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var user = await _userRepository.GetCurrentUserAsync();
+            var userDto = _mapper.Map<UserDto>(user);
+            return Ok(user);
+        }
     }
 }
