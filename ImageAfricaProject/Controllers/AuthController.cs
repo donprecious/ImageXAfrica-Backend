@@ -88,7 +88,7 @@ namespace ImageAfricaProject.Controllers
                         return await _jwtFactory.GenerateClaimsIdentity(userName,userToVerify.Id);
                     }
                 }
-            }r
+            }
             // Credentials are invalid, or account doesn't exist
             return await Task.FromResult<ClaimsIdentity>(null);
 
