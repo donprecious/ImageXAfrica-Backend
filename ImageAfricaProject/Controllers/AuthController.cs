@@ -106,12 +106,11 @@ namespace ImageAfricaProject.Controllers
             }
             else
             {
-                
                 foreach (var i in result.Errors)
                 {
                     ModelState.AddModelError(i.Code.ToString(), i.Description);
                 }
-                 return StatusCode(500, ModelState);
+                 return BadRequest( ModelState);
             }
             return StatusCode(500, "server error");
         }

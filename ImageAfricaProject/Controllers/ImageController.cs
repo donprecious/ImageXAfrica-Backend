@@ -272,7 +272,7 @@ namespace ImageAfricaProject.Controllers
                 .Include(a=>a.Category)
                 .Include(a=>a.User)
                 .Include(a=>a.ImageTag).
-                ThenInclude(tg=>tg.Tag)
+                 ThenInclude(tg=>tg.Tag)
                 .ToListAsync();
             var mapped = _mapper.Map<List<GetImageDto>>(images);
             return Ok(mapped);
