@@ -7,6 +7,7 @@ using AutoMapper;
 using Factories;
 using Helpers;
 using ImageAfricaProject.Dto;
+using ImageAfricaProject.Dto.auth;
 using ImageAfricaProject.Entities;
 using ImageAfricaProject.Helpers;
 using ImageAfricaProject.Repository;
@@ -123,5 +124,89 @@ namespace ImageAfricaProject.Controllers
             var userDto = _mapper.Map<UserDto>(user);
             return Ok(user);
         }
+        
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> GoogleAuth([FromBody] GoogleLoginDto externalLogin)
+        {
+            var payLoad = await _userRepository.ValidateGooglePayLoad(externalLogin.IdToken);
+            //var info = await _signInManager.GetExternalLoginInfoAsync();
+
+            if (payLoad == null)
+            {
+                return Unauthorized("Please login, no provider found");
+            }
+
+            //  find user by email if he exists 
+            var user = await _userManager.FindByEmailAsync(payLoad.Email);
+
+            if (user != null)
+            {
+               
+                if (payLoad.EmailVerified)
+                {
+                    user.EmailConfirmed = true;
+                  await  _userRepository.Update(user);
+                  await _userRepository.Save();
+                }
+                    var identity = await _jwtFactory.GenerateClaimsIdentity(user.UserName, user.Id);
+                    var token = await _jwtFactory.GenerateEncodedToken(user.UserName, identity);
+                    var mappedUser = _mapper.Map<UserDto>(user);
+                    var roles = await _userManager.GetRolesAsync(user);
+                    var response = new
+                    {
+                        id=identity.Claims.Single(c=>c.Type=="id").Value,
+                        auth_token = token,
+                        expires_in = (int)_jwtOptions.ValidFor.TotalSeconds,
+                        roles = roles,
+                        user = mappedUser
+                    };
+                    return Ok(response);
+             
+
+            }
+            else
+            {
+                // no user found create a new one and set emailConfirm to true 
+
+                var createdUser = await _userManager.CreateAsync(new ApplicationUser()
+                {
+                    Email = payLoad.Email,
+                    FirstName = payLoad.GivenName,
+                    LastName = payLoad.FamilyName,
+                    UserName = payLoad.Email,
+                    TwoFactorEnabled = true,
+                    EmailConfirmed = true
+                });
+
+                if (createdUser.Succeeded)
+                {
+                    // sign in the user with a token and notify the user to update his password 
+                    var newUser = await _userManager.FindByEmailAsync(payLoad.Email);
+                    if (newUser == null) return BadRequest("unable to find this user, please try again");
+
+                    var identity = await _jwtFactory.GenerateClaimsIdentity(newUser.UserName, newUser.Id);
+                  
+                    var mappedUser = _mapper.Map<UserDto>(newUser);
+                    var roles = await _userManager.GetRolesAsync(newUser);
+                    var response = new
+                    {
+                        id=identity.Claims.Single(c=>c.Type=="id").Value,
+                        auth_token = await _jwtFactory.GenerateEncodedToken(newUser.UserName, identity),
+                        expires_in = (int)_jwtOptions.ValidFor.TotalSeconds,
+                        roles = roles,
+                        user = mappedUser,
+                        message = "success, please redirect user to setup his password"
+                    };
+                    return Ok(response);
+                  
+                }
+            }
+
+            return StatusCode(500, "something went wrong");
+
+        } 
+
+
     }
 }

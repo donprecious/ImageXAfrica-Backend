@@ -247,7 +247,6 @@ namespace ImageAfricaProject.Controllers
             if (user == null) return Unauthorized("user not authorized to access this"); 
             var userId = user.Id;
 
-
             var collection = await _contentCollectionRepository.GetAll()
                 .Where(a=>a.UserId == userId)
                 .Include(a => a.Image)
