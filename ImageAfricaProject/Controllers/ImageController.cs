@@ -74,6 +74,7 @@ namespace ImageAfricaProject.Controllers
         }
        
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> UploadFiles()
         {
             var file = Request.Form.Files[0];
