@@ -12,6 +12,7 @@ using ImageAfricaProject.Entities;
 using ImageAfricaProject.Helpers;
 using ImageAfricaProject.Repository;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -75,6 +76,7 @@ namespace ImageAfricaProject.Controllers
        
         [HttpPost]
         [AllowAnonymous]
+        [DisableCors]
         public async Task<IActionResult> UploadFiles()
         {
             var file = Request.Form.Files[0];
