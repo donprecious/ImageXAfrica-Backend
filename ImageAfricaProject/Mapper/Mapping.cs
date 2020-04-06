@@ -19,6 +19,8 @@ namespace ImageAfricaProject.Mapper
           //  CreateMap<source, destination>()
             CreateMap<ApplicationUser, UserDto>();
             CreateMap<UserDto, ApplicationUser>();
+            CreateMap<UpdateUserDto, ApplicationUser>();
+            CreateMap<ApplicationUser, UpdateUserDto>();
             CreateMap<CreateUserDto, ApplicationUser>();
             CreateMap<ApplicationUser, UserAuthDto>();
 
