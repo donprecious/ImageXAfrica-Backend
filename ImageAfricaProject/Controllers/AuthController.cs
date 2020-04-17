@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -11,10 +12,13 @@ using ImageAfricaProject.Dto.auth;
 using ImageAfricaProject.Entities;
 using ImageAfricaProject.Helpers;
 using ImageAfricaProject.Repository;
+using ImageAfricaProject.Services;
+using ImageAfricaProject.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Providers;
@@ -34,13 +38,17 @@ namespace ImageAfricaProject.Controllers
         private readonly JsonSerializerSettings _serializerSettings;
         private readonly JwtIssuerOptions _jwtOptions;
         private readonly IMapper _mapper;
-        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IJwtFactory jwtFactory,  IOptions<JwtIssuerOptions> jwtOptions, IMapper mapper, IUserRepository userRepository)
+        private IEmailService _emailService;
+        private IConfiguration _config;
+        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IJwtFactory jwtFactory,  IOptions<JwtIssuerOptions> jwtOptions, IMapper mapper, IUserRepository userRepository, IEmailService emailService, IConfiguration config)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _jwtFactory = jwtFactory;
             _mapper = mapper;
             _userRepository = userRepository;
+            _emailService = emailService;
+            _config = config;
             _serializerSettings = new JsonSerializerSettings
             {
                 Formatting = Formatting.Indented
@@ -207,6 +215,217 @@ namespace ImageAfricaProject.Controllers
 
         } 
 
+        
+        [HttpGet("resend-confirmation")]
+        public async Task<IActionResult> ResendConfirmationEmail(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                NotFound(new
+                {
+                    status = "fail",
+                    message = "invalid user email"
+                });
+            }
+
+            if (user.EmailConfirmed)
+            {
+                return BadRequest(new
+                {
+                    status = "fail",
+                    message = "email already confirmed"
+                });
+            }
+
+            var callbackUrl = await GenerateToken(user, "confirmation", "ComfirmEmail");
+
+            await _emailService.Send(user.Email, "Email Confirmation",
+                   $"<p>Email confirmation <a href={callbackUrl}>Link</a></p>");
+
+            return Ok(new
+            {
+                status = "success",
+                message = "email confirmation link has been sent"
+            });
+        }
+
+        private async Task<string> GenerateToken(ApplicationUser user, string tokenType, string method)
+        {
+            var token = "";
+            if (tokenType == "confirmation")
+            {
+                token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            }
+
+            if (tokenType == "reset")
+            {
+                token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            }
+
+            //token = HttpUtility.UrlEncode(token);
+
+            var fontEndUrl = _config.GetSection("frontendUrl").Value;
+            var url = $"{fontEndUrl}/auth/{method}/?userId={user.Email}&token={token}";
+            return url;
+        }
+
+        [HttpGet("confirm")]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (userId == null || token == null)
+            {
+                return BadRequest(new
+                {
+                    status = "fail",
+                    message = "token is invalid or has expired"
+                });
+            }
+
+            var user = await _userManager.FindByEmailAsync(userId);
+            if (user == null)
+            {
+                return BadRequest(new
+                {
+                    status = "fail",
+                    message = $"invalid user {userId}"
+                });
+            }
+
+            if (user.EmailConfirmed)
+            {
+                return BadRequest(new
+                {
+                    status = "fail",
+                    message = "email already confirmed"
+                });
+            }
+
+            //token = HttpUtility.UrlDecode(token);
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+
+            if (result.Succeeded)
+            {
+                return Ok(new ResponseDto()
+                {
+                    Status = ResponseStatus.Success,
+                    Message = "confirmed successfully"
+                });
+            }
+
+            return BadRequest(new
+            {
+                status = "fail",
+                message = "token is invalid or has expired"
+            });
+        }
+
+        [HttpPost("forgot")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto forgotPasswordDto)
+        {
+            var user = await _userManager.FindByEmailAsync(forgotPasswordDto.Email);
+
+            if (user == null)
+            {
+                return Ok(new
+                {
+                    status = "success",
+                    message = "reset password link has been sent"
+                });
+            }
+
+            if (!user.EmailConfirmed)
+            {
+                return StatusCode((int)HttpStatusCode.Forbidden, new
+                {
+                    status = "fail",
+                    message = "your email is not yet confirmed"
+                });
+            }
+
+            var callbackUrl = await GenerateToken(user, "reset", "ResetPassword");
+
+            await _emailService.Send(user.Email, "Password Reset",
+                   $"<p>Password reset token <a href={callbackUrl}>Link</a></p>");
+
+            return Ok(new
+            {
+                status = "success",
+                message = "reset password link has been sent"
+            });
+        }
+
+        [HttpPatch("reset")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
+        {
+            if (resetPasswordDto.UserId == null || resetPasswordDto.Token == null)
+            {
+                return BadRequest(new
+                {
+                    status = "fail",
+                    message = "token is invalid or has expired"
+                });
+            }
+
+            var user = await _userManager.FindByEmailAsync(resetPasswordDto.UserId);
+            if (user == null)
+            {
+                return BadRequest(new
+                {
+                    status = "fail",
+                    message = "token is invalid or has expired"
+                });
+            }
+
+            var token = resetPasswordDto.Token;
+
+            var update = await _userManager.ResetPasswordAsync(user, token, resetPasswordDto.Password);
+
+            if (update.Succeeded)
+            {
+                return Ok(new
+                {
+                    status = "success",
+                    message = "password was changed"
+                });
+            }
+
+            return BadRequest(new
+            {
+                status = "error",
+                message = "password not changed",
+                errors = update.Errors
+            });
+        }
+
+        [Authorize]
+        [HttpPatch("Change-Password")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
+        {
+            var user = await _userRepository.GetCurrentUserAsync();
+            if (user == null) return Unauthorized("User Not Authorized");
+
+            var result = await _userManager.ChangePasswordAsync(user, changePasswordDto.CurrentPassword,
+                changePasswordDto.NewPassword);
+
+            if (result.Succeeded)
+            {
+                return Ok(new
+                {
+                    status = "success",
+                    message = "password has been updated"
+                });
+            }
+
+            return BadRequest(new
+            {
+                status = "error",
+                message = "password not updated",
+                errors = result.Errors
+            });
+        }
 
     }
 }

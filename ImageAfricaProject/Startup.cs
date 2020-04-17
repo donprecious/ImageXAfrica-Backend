@@ -22,7 +22,9 @@ using Microsoft.IdentityModel.Tokens;
 using  AutoMapper;
 using CrExtApiCore.Factories;
 using Factories;
+using ImageAfricaProject.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
@@ -54,13 +56,11 @@ namespace ImageAfricaProject
                     options.Password.RequireNonAlphanumeric = false;
                     options.Password.RequireUppercase = false;
                     options.Password.RequiredLength = 6;
-
                     options.SignIn.RequireConfirmedAccount = true;
-                
                 })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultUI()
-                .AddDefaultTokenProviders();;
+                .AddDefaultTokenProviders();
 
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -125,7 +125,8 @@ namespace ImageAfricaProject
             services.AddScoped<IImageTagRepository, ImageTagRepository>();
             services.AddScoped<ITagRepository, TagRepository>();
             services.AddScoped<IContentCollectionRepository, ContentCollectionRepository>();
-            //services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddHttpContextAccessor();
 
             //services.AddTransient<IUnitOfWork, UnitOfWork>(); 
@@ -155,7 +156,8 @@ namespace ImageAfricaProject
             app.UseCors(x => x
                 .AllowAnyOrigin()
                 .AllowAnyMethod()
-                .AllowAnyHeader());
+                .AllowAnyHeader()
+                );
 
             app.UseAuthentication();
             app.UseAuthorization();
