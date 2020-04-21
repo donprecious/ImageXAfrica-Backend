@@ -38,9 +38,10 @@ namespace ImageAfricaProject.Controllers
         private readonly JsonSerializerSettings _serializerSettings;
         private readonly JwtIssuerOptions _jwtOptions;
         private readonly IMapper _mapper;
-        private IEmailService _emailService;
+        private IEmailSender _emailService;
+
         private IConfiguration _config;
-        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IJwtFactory jwtFactory,  IOptions<JwtIssuerOptions> jwtOptions, IMapper mapper, IUserRepository userRepository, IEmailService emailService, IConfiguration config)
+        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IJwtFactory jwtFactory,  IOptions<JwtIssuerOptions> jwtOptions, IMapper mapper, IUserRepository userRepository, IEmailSender emailService, IConfiguration config)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -69,16 +70,22 @@ namespace ImageAfricaProject.Controllers
             //convert user to a user dto model and upload along side the request 
             var mappedUser = _mapper.Map<UserDto>(user);
             var roles = await _userManager.GetRolesAsync(user);
+            var canSigin = await _signInManager.CanSignInAsync(user);
             var response = new
             {
                 id=identity.Claims.Single(c=>c.Type=="id").Value,
                 auth_token = await _jwtFactory.GenerateEncodedToken(model.Email, identity),
                 expires_in = (int)_jwtOptions.ValidFor.TotalSeconds,
                 roles = roles,
-                user = mappedUser
+                user = mappedUser,
+                canLogin = canSigin
             };
             var json = JsonConvert.SerializeObject(response, _serializerSettings);
-            return new OkObjectResult(json);
+            return Ok( new ResponseDto
+            {
+                Status = ResponseStatus.Success,
+                 Data = response
+            });
         }
 
         
@@ -111,17 +118,34 @@ namespace ImageAfricaProject.Controllers
             var result = await _userManager.CreateAsync(mappedUser, model.Password);
             if (result.Succeeded)
             {
-                return StatusCode(201, mappedUser);
+                var user = await _userManager.FindByEmailAsync(mappedUser.Email);
+                var url = await GenerateToken(user, "confirmation", "confirm");
+                await _emailService.SendConfirmationEmail(user.Email, url);
+              return StatusCode(201, new ResponseDto()
+                {
+                    Data = new
+                    {
+                        canLogin = false,
+                    },
+                    Status =  ResponseStatus.Success,
+                    Message = "email confirmation sent"
+                });
             }
             else
             {
+                var errors = "";
                 foreach (var i in result.Errors)
                 {
-                    ModelState.AddModelError(i.Code.ToString(), i.Description);
+                    errors += i.Description + " ,";
+
                 }
-                 return BadRequest( ModelState);
+                return BadRequest(new ResponseDto()
+                {
+                    Status =  ResponseStatus.Fail,
+                    Message = errors.TrimEnd(',')
+                });
             }
-            return StatusCode(500, "server error");
+            return StatusCode(500, "cannot create user at this time, please try again later");
         }
 
         [Authorize]
@@ -167,9 +191,10 @@ namespace ImageAfricaProject.Controllers
                         auth_token = token,
                         expires_in = (int)_jwtOptions.ValidFor.TotalSeconds,
                         roles = roles,
-                        user = mappedUser
+                        user = mappedUser,
+                        canLogin = true
                     };
-                    return Ok(response);
+                    return Ok( new ResponseDto { Data = response, Status = ResponseStatus.Success});
              
 
             }
@@ -194,7 +219,7 @@ namespace ImageAfricaProject.Controllers
                     if (newUser == null) return BadRequest("unable to find this user, please try again");
 
                     var identity = await _jwtFactory.GenerateClaimsIdentity(newUser.UserName, newUser.Id);
-                  
+                   
                     var mappedUser = _mapper.Map<UserDto>(newUser);
                     var roles = await _userManager.GetRolesAsync(newUser);
                     var response = new
@@ -204,9 +229,14 @@ namespace ImageAfricaProject.Controllers
                         expires_in = (int)_jwtOptions.ValidFor.TotalSeconds,
                         roles = roles,
                         user = mappedUser,
+                        canLogin = true,
                         message = "success, please redirect user to setup his password"
                     };
-                    return Ok(response);
+                    return Ok(new ResponseDto()
+                    {
+                        Data = response,
+                        Status = ResponseStatus.Success
+                    });
                   
                 }
             }
@@ -239,10 +269,9 @@ namespace ImageAfricaProject.Controllers
                 });
             }
 
-            var callbackUrl = await GenerateToken(user, "confirmation", "ComfirmEmail");
+            var callbackUrl = await GenerateToken(user, "confirmation", "confirm");
 
-            await _emailService.Send(user.Email, "Email Confirmation",
-                   $"<p>Email confirmation <a href={callbackUrl}>Link</a></p>");
+            await _emailService.SendConfirmationEmail(user.Email, callbackUrl);
 
             return Ok(new
             {
@@ -266,8 +295,8 @@ namespace ImageAfricaProject.Controllers
 
             //token = HttpUtility.UrlEncode(token);
 
-            var fontEndUrl = _config.GetSection("frontendUrl").Value;
-            var url = $"{fontEndUrl}/auth/{method}/?userId={user.Email}&token={token}";
+            var fontEndUrl = _config.GetSection("FrontEnd.BaseUrl").Value;
+            var url = $"{fontEndUrl}/{method}/?userId={user.Email}&token={token}";
             return url;
         }
 
@@ -302,7 +331,7 @@ namespace ImageAfricaProject.Controllers
                 });
             }
 
-            //token = HttpUtility.UrlDecode(token);
+            token = token.Replace(" ", "+");
 
             var result = await _userManager.ConfirmEmailAsync(user, token);
 
@@ -347,8 +376,7 @@ namespace ImageAfricaProject.Controllers
 
             var callbackUrl = await GenerateToken(user, "reset", "ResetPassword");
 
-            await _emailService.Send(user.Email, "Password Reset",
-                   $"<p>Password reset token <a href={callbackUrl}>Link</a></p>");
+            await _emailService.SendForgetPasswordEmail(user.Email, callbackUrl);
 
             return Ok(new
             {
@@ -379,7 +407,7 @@ namespace ImageAfricaProject.Controllers
                 });
             }
 
-            var token = resetPasswordDto.Token;
+            var token = resetPasswordDto.Token.Replace(" ","+");
 
             var update = await _userManager.ResetPasswordAsync(user, token, resetPasswordDto.Password);
 

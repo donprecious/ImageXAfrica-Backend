@@ -5,9 +5,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
-using MailKit;
-using MailKit.Net.Smtp;
-using MimeKit;
+
 namespace ImageAfricaProject.Services
 {
     public class EmailService : IEmailService
@@ -27,12 +25,25 @@ namespace ImageAfricaProject.Services
             var SmtpPort = Convert.ToInt32(_config.GetSection("EmailConfig.SmtpPort").Value);
             var SmtpUsername = _config.GetSection("EmailConfig.SmtpUsername").Value;
             var SmtpPassword = _config.GetSection("EmailConfig.SmtpPassword").Value;
-            
-            var smtp = new SmtpClient();
-            await smtp.ConnectAsync(SmtpServer, SmtpPort);
-            await smtp.AuthenticateAsync(SmtpUsername, SmtpPassword);
-            await smtp.SendAsync(message);
-            await smtp.DisconnectAsync(true);
+            try
+            {
+                using (var smtp = new MailKit.Net.Smtp.SmtpClient())
+                {
+                    await smtp.ConnectAsync(SmtpServer, SmtpPort);
+                    await smtp.AuthenticateAsync(SmtpUsername, SmtpPassword);
+                    await smtp.SendAsync(message);
+                    //await smtp.DisconnectAsync(true);
+                }
+
+                ;
+               
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                
+            }
+           
         }
 
         private MimeMessage MessageBuilder(string to, string subject, string body)

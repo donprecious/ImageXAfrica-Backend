@@ -13,7 +13,16 @@ namespace ImageAfricaProject.Helpers
         {
             if (!context.ModelState.IsValid)
             {
-                context.Result = new ValidationFailedResult(context.ModelState);
+                var error = context.ModelState
+                    .Where(a => a.Value.Errors.Count > 0)
+                    .SelectMany(x => x.Value.Errors).FirstOrDefault();
+                    
+                context.Result = new BadRequestObjectResult(new
+                {
+                    status = "fail",
+                    message = error.ErrorMessage
+                });
+                //context.Result = new ValidationFailedResult(context.ModelState);
             }
         }
     }

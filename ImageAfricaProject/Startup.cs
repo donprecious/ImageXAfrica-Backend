@@ -25,10 +25,13 @@ using Factories;
 using ImageAfricaProject.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Providers;
+using IEmailSender = ImageAfricaProject.Services.IEmailSender;
 
 namespace ImageAfricaProject
 {
@@ -65,9 +68,14 @@ namespace ImageAfricaProject
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddControllers().AddNewtonsoftJson(options => {
-                //options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.ca();
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             }).AddXmlSerializerFormatters(); 
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true; // This is the setting
+           
+            });
             services.AddScoped<IJwtFactory, JwtFactory>();
 
             var appSettingsSection = Configuration.GetSection("AppSettings");
@@ -126,6 +134,8 @@ namespace ImageAfricaProject
             services.AddScoped<ITagRepository, TagRepository>();
             services.AddScoped<IContentCollectionRepository, ContentCollectionRepository>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IEmailSender, EmailSender>();
+            services.AddScoped<IEmailTemplateProvider, EmailTemplateProvider>();
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddHttpContextAccessor();
 

@@ -10,7 +10,6 @@ using ImageAfricaProject.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Services;
 
 namespace ImageAfricaProject.Controllers
 {
