@@ -50,8 +50,6 @@ namespace ImageAfricaProject.Repository
             var payload = await GoogleJsonWebSignature.ValidateAsync(tokenId, settings);
             return payload;
         }
-        //public async Task<List<ApplicationUser>> GetLast30DaysLeaderboard()
-        // public async Task<IQueryable<Object>> GetLast30DaysLeaderboard()
         public async Task<List<UserLeaderBoardDto>> GetLast30DaysLeaderboard()
         {
             DateTime thirtyDaysAgo = DateTime.Now.AddDays(-30);
@@ -80,7 +78,6 @@ namespace ImageAfricaProject.Repository
             foreach (var image in images)
             {
                 UserLeaderBoardDto User = user.Where(a => a.Id == image.UserId).FirstOrDefault();
-                //var ul = (List<object>)User.GetType().GetProperty("Images").GetValue(User, null);
                 var ul = User.Images;
                 ul.Add(image);
             };
@@ -121,7 +118,6 @@ namespace ImageAfricaProject.Repository
             foreach (var image in images)
             {
                 UserLeaderBoardDto User = user.Where(a => a.Id == image.UserId).FirstOrDefault();
-                //var ul = (List<object>)User.GetType().GetProperty("Images").GetValue(User, null);
                 var ul = User.Images;
                 ul.Add(image);
             };
