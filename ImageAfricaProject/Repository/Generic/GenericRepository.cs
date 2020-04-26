@@ -60,7 +60,7 @@ namespace ImageAfricaProject.Repository.Generic
           
         public async Task<bool> Save()
         {
-            return await((DbContext)_dbContext).SaveChangesAsync(default(CancellationToken)) >= 0;
+            return await ((DbContext)_dbContext).SaveChangesAsync(default(CancellationToken)) >= 0; 
         }
     }
 }

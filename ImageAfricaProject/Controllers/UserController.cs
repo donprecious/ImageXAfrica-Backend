@@ -58,5 +58,17 @@ namespace ImageAfricaProject.Controllers
             }
             return NoContent();
         }
+        [HttpGet]
+        public async Task<IActionResult> GetLast30DaysLeaderboard()
+        {
+            // right join imageviews to image userIdcolumn
+            return Ok(_userRepository.GetLast30DaysLeaderboard());
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAllTimeLeaderboard()
+        {
+            // right join imageviews to image userIdcolumn
+            return Ok(_userRepository.GetAllTimeLeaderboard());
+        }
     }
 }

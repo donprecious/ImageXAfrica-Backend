@@ -16,6 +16,8 @@ namespace ImageAfricaProject.Data
         public virtual DbSet<ContentCollection> ContentCollections { get; set; }
         public virtual DbSet<ImageView> ImageViews { get; set; }
         public virtual DbSet<ImageLike> ImageLikes { get; set; }
+        public virtual DbSet<Challenge> Challenges { get; set; }
+        public virtual DbSet<UserChallenge> UserChallenges { get; set; } 
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

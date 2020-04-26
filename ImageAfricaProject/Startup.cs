@@ -125,6 +125,7 @@ namespace ImageAfricaProject
             services.AddScoped<IImageTagRepository, ImageTagRepository>();
             services.AddScoped<ITagRepository, TagRepository>();
             services.AddScoped<IContentCollectionRepository, ContentCollectionRepository>();
+            services.AddScoped<IChallengeRepository, ChallengeRepository>();
             //services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddHttpContextAccessor();
 

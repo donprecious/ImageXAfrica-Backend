@@ -73,7 +73,7 @@ namespace ImageAfricaProject.Controllers
           await _imageRepository.Save();
             return Ok(mapped);
         }
-       
+
         [HttpPost]
         [AllowAnonymous]
         [DisableCors]
@@ -90,16 +90,16 @@ namespace ImageAfricaProject.Controllers
                     var url = await  objBlobService.UploadFileStreamToBlobAsync(file.FileName, file);
                     //fileUrls.Add(url);
                 //}
-                var obj = new
-                {
-                    url = url,
-                    uploadURL = url
-                };
-                return Ok(obj);
+            var obj = new
+            {
+                url = url,
+                uploadURL = url
+            };
+            return Ok(obj);
         }
+
         [HttpGet]
         [AllowAnonymous]
-
         public async Task<IActionResult> GetTags()
         {
             var tags = await _tagRepository.GetAll().ToListAsync();

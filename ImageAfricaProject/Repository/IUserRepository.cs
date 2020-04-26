@@ -15,5 +15,7 @@ namespace ImageAfricaProject.Repository
         Task<ApplicationUser> GetCurrentUserAsync();
 
         Task<GoogleJsonWebSignature.Payload> ValidateGooglePayLoad(string tokenId);
+        Task<List<UserLeaderBoardDto>> GetLast30DaysLeaderboard();
+        Task<List<UserLeaderBoardDto>> GetAllTimeLeaderboard();
     }
 }
