@@ -178,6 +178,10 @@ namespace ImageAfricaProject.Controllers
                 if (payLoad.EmailVerified)
                 {
                     user.EmailConfirmed = true;
+                    if (string.IsNullOrEmpty(user.ProfileImageUrl))
+                    {
+                        user.ProfileImageUrl = payLoad.Picture;
+                    }
                   await  _userRepository.Update(user);
                   await _userRepository.Save();
                 }
@@ -209,7 +213,8 @@ namespace ImageAfricaProject.Controllers
                     LastName = payLoad.FamilyName,
                     UserName = payLoad.Email,
                     TwoFactorEnabled = true,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    ProfileImageUrl =  payLoad.Picture
                 });
 
                 if (createdUser.Succeeded)
@@ -243,9 +248,99 @@ namespace ImageAfricaProject.Controllers
 
             return StatusCode(500, "something went wrong");
 
-        } 
+        }
 
-        
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> FacebookAuth([FromBody] FacebookLoginDto facebookLoginDto)
+        {
+            var payLoad = await _userRepository.GetFacebookUser(facebookLoginDto.UserId, facebookLoginDto.Token);
+            //var info = await _signInManager.GetExternalLoginInfoAsync();
+
+            if (payLoad == null)
+            {
+                return Unauthorized(
+                    "Sorry, we cannot validate your info, from facebook, please try another login provider");
+            }
+
+            //  find user by email if he exists 
+            var user = await _userManager.FindByEmailAsync(payLoad.email);
+
+            if (user != null)
+            {
+
+
+                user.EmailConfirmed = true;
+                if (string.IsNullOrEmpty(user.ProfileImageUrl))
+                {
+                    user.ProfileImageUrl = payLoad.picture.data.url;
+                }
+
+                await _userRepository.Update(user);
+                await _userRepository.Save();
+
+                var identity = await _jwtFactory.GenerateClaimsIdentity(user.UserName, user.Id);
+                var token = await _jwtFactory.GenerateEncodedToken(user.UserName, identity);
+                var mappedUser = _mapper.Map<UserDto>(user);
+                var roles = await _userManager.GetRolesAsync(user);
+                var response = new
+                {
+                    id = identity.Claims.Single(c => c.Type == "id").Value,
+                    auth_token = token,
+                    expires_in = (int) _jwtOptions.ValidFor.TotalSeconds,
+                    roles = roles,
+                    user = mappedUser,
+                    canLogin = true
+                };
+                return Ok(new ResponseDto {Data = response, Status = ResponseStatus.Success});
+            }
+                else
+            {
+                // no user found create a new one and set emailConfirm to true 
+
+                var createdUser = await _userManager.CreateAsync(new ApplicationUser()
+                {
+                    Email = payLoad.email,
+                    FirstName = payLoad.first_name,
+                    LastName = payLoad.last_name,
+                    UserName = payLoad.email,
+                    TwoFactorEnabled = true,
+                    EmailConfirmed = true,
+                    ProfileImageUrl =  payLoad.picture.data.url
+                });
+
+                if (createdUser.Succeeded)
+                {
+                    // sign in the user with a token and notify the user to update his password 
+                    var newUser = await _userManager.FindByEmailAsync(payLoad.email);
+                    if (newUser == null) return BadRequest("unable to find this user, please try again");
+
+                    var identity = await _jwtFactory.GenerateClaimsIdentity(newUser.UserName, newUser.Id);
+                   
+                    var mappedUser = _mapper.Map<UserDto>(newUser);
+                    var roles = await _userManager.GetRolesAsync(newUser);
+                    var response = new
+                    {
+                        id=identity.Claims.Single(c=>c.Type=="id").Value,
+                        auth_token = await _jwtFactory.GenerateEncodedToken(newUser.UserName, identity),
+                        expires_in = (int)_jwtOptions.ValidFor.TotalSeconds,
+                        roles = roles,
+                        user = mappedUser,
+                        canLogin = true,
+                        message = "success, please redirect user to setup his password"
+                    };
+                    return Ok(new ResponseDto()
+                    {
+                        Data = response,
+                        Status = ResponseStatus.Success
+                    });
+                  
+                }
+            }
+
+            return StatusCode(500, "something went wrong");
+        }
+
         [HttpGet("resend-confirmation")]
         public async Task<IActionResult> ResendConfirmationEmail(string email)
         {

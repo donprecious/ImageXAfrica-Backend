@@ -125,7 +125,17 @@ namespace ImageAfricaProject
             });
 
             services.AddAutoMapper(typeof(Startup));
-           
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: "AllowAll",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin();
+                        builder.AllowAnyHeader();
+                        builder.AllowAnyMethod();
+                    });
+            });
+
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IImageRepository, ImageRepository>();
@@ -163,11 +173,7 @@ namespace ImageAfricaProject
             app.UseRouting();
             
             // global cors policy
-            app.UseCors(x => x
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                );
+            app.UseCors("AllowAll");
 
             app.UseAuthentication();
             app.UseAuthorization();
