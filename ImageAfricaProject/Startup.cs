@@ -137,6 +137,7 @@ namespace ImageAfricaProject
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<IEmailTemplateProvider, EmailTemplateProvider>();
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped<IChallengeRepository, ChallengeRepository>();
             services.AddHttpContextAccessor();
 
             //services.AddTransient<IUnitOfWork, UnitOfWork>(); 
