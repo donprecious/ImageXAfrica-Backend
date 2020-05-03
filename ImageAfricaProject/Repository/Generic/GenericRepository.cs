@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ImageAfricaProject.Repository.Generic
 {
     public class GenericRepository<TEntity> : IGenericRepository<TEntity>
-        where TEntity : class
+        where TEntity : Entity
     {
         public readonly ApplicationDbContext _dbContext;
 
@@ -47,14 +47,18 @@ namespace ImageAfricaProject.Repository.Generic
         }
         public async Task Update(TEntity entity)
         {
-            
-           
+            entity.LastModificationTime = DateTime.UtcNow;
+
             _dbContext.Set<TEntity>().Update(entity);
         }
 
         public async Task Delete(int id)
         {  
+
             var entity = await GetById(id);
+            entity.DeletionTime = DateTime.UtcNow;
+            entity.LastModificationTime = DateTime.UtcNow;
+
             _dbContext.Set<TEntity>().Remove(entity);
         }
           

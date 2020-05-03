@@ -23,6 +23,8 @@ namespace ImageAfricaProject.Dto.image
         [Required (ErrorMessage = "Category Required")]
         public int CategoryId{get;set;}
         public string UserId { get; set; }
+      
+        public string FileType { get; set; }
         public List<string> Tag { get; set; }
     }
 }

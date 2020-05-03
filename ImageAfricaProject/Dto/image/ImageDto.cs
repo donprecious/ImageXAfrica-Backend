@@ -19,7 +19,6 @@ namespace ImageAfricaProject.Dto.image
         public double GeoLog {get;set;}
         public int CategoryId{get;set;}
         public string UserId { get; set; }
-        public bool IsVideo { get; set; }
         public string FileType { get; set; }
     
     }

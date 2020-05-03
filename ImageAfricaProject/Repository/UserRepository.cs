@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 using Google.Apis.Auth;
 using ImageAfricaProject.Data;
 using ImageAfricaProject.Dto;
+using ImageAfricaProject.Dto.auth;
 using ImageAfricaProject.Entities;
 using ImageAfricaProject.Repository.Generic;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.Configuration;
+using Refit;
 
 namespace ImageAfricaProject.Repository
 {
@@ -46,86 +47,10 @@ namespace ImageAfricaProject.Repository
             var settings = new GoogleJsonWebSignature.ValidationSettings(){
                 Audience = new string[] { _config.GetSection("Google:ClientId").Value } 
             };
+            
            
             var payload = await GoogleJsonWebSignature.ValidateAsync(tokenId, settings);
             return payload;
-        }
-        public async Task<List<UserLeaderBoardDto>> GetLast30DaysLeaderboard()
-        {
-            DateTime thirtyDaysAgo = DateTime.Now.AddDays(-30);
-            var imageViews = from ImageView in _dbContext.ImageViews
-                             join Images in _dbContext.Images
-                             on ImageView.ImageId equals Images.Id
-                             select new { ImageView.Id, ImageView.ImageId, UserId = Images.UserId, Images.CreationTime};
-
-            //var iV = _dbContext.ImageViews.Where(a => a.ImageId == a.Image.Id)
-              //  .Select(a => new { a.Id, a.ImageId, a.Image.UserId, a.Image.CreationTime}).ToList();
-
-            var user = (from User in _dbContext.Users
-                       join ImageView in imageViews
-                       on User.Id equals ImageView.UserId
-                       where ImageView.CreationTime > thirtyDaysAgo
-                       let imageViewCount = imageViews.Count(i => i.UserId != null)
-                       orderby imageViewCount
-                       select new UserLeaderBoardDto{ UserName = User.UserName, FirstName = User.FirstName, LastName = User.LastName,
-                                 Id = User.Id, ImageViewCounts = imageViewCount, Images = new List<object>()}).Distinct().ToList();
-
-
-            var images = (from Image in _dbContext.Images
-                         join ImageView in imageViews        
-                         on Image.Id equals ImageView.ImageId
-                         where ImageView.CreationTime > thirtyDaysAgo
-                         let ImageViewCount = imageViews.Count(i => i.ImageId != 0)
-                         orderby ImageViewCount
-                         select new { Image.Name, Image.UserId, ImageViewCount, Image.ImageUrl, Image.Id}).Distinct().ToList();
-
-            foreach (var image in images)
-            {
-                UserLeaderBoardDto User = user.Where(a => a.Id == image.UserId).FirstOrDefault();
-                var ul = User.Images;
-                ul.Add(image);
-            };
-            return user;
-        }
-        public async Task<List<UserLeaderBoardDto>> GetAllTimeLeaderboard()
-        {
-            DateTime thirtyDaysAgo = DateTime.Now.AddDays(-30);
-            var imageViews = from ImageView in _dbContext.ImageViews
-                             join Images in _dbContext.Images
-                             on ImageView.ImageId equals Images.Id
-                             select new { ImageView.Id, ImageView.ImageId, UserId = Images.UserId, Images.CreationTime };
-
-            var user = (from User in _dbContext.Users
-                        join ImageView in imageViews
-                        on User.Id equals ImageView.UserId
-                        where ImageView.CreationTime > thirtyDaysAgo
-                        let imageViewCount = imageViews.Count(i => i.UserId != null)
-                        orderby imageViewCount
-                        select new UserLeaderBoardDto
-                        {
-                            UserName = User.UserName,
-                            FirstName = User.FirstName,
-                            LastName = User.LastName,
-                            Id = User.Id,
-                            ImageViewCounts = imageViewCount,
-                            Images = new List<object>()
-                        }).Distinct().ToList();
-
-            var images = (from Image in _dbContext.Images
-                          join ImageView in imageViews
-                          on Image.Id equals ImageView.ImageId
-                          where ImageView.CreationTime > thirtyDaysAgo
-                          let ImageViewCount = imageViews.Count(i => i.ImageId != 0)
-                          orderby ImageViewCount
-                          select new { Image.Name, Image.UserId, ImageViewCount, Image.ImageUrl, Image.Id }).Distinct().ToList();
-
-            foreach (var image in images)
-            {
-                UserLeaderBoardDto User = user.Where(a => a.Id == image.UserId).FirstOrDefault();
-                var ul = User.Images;
-                ul.Add(image);
-            };
-            return user;
         }
     }
 }
