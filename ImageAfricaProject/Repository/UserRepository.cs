@@ -58,6 +58,9 @@ namespace ImageAfricaProject.Repository
                              on ImageView.ImageId equals Images.Id
                              select new { ImageView.Id, ImageView.ImageId, UserId = Images.UserId, Images.CreationTime};
 
+            //var iV = _dbContext.ImageViews.Where(a => a.ImageId == a.Image.Id)
+              //  .Select(a => new { a.Id, a.ImageId, a.Image.UserId, a.Image.CreationTime}).ToList();
+
             var user = (from User in _dbContext.Users
                        join ImageView in imageViews
                        on User.Id equals ImageView.UserId
@@ -66,6 +69,7 @@ namespace ImageAfricaProject.Repository
                        orderby imageViewCount
                        select new UserLeaderBoardDto{ UserName = User.UserName, FirstName = User.FirstName, LastName = User.LastName,
                                  Id = User.Id, ImageViewCounts = imageViewCount, Images = new List<object>()}).Distinct().ToList();
+
 
             var images = (from Image in _dbContext.Images
                          join ImageView in imageViews        
