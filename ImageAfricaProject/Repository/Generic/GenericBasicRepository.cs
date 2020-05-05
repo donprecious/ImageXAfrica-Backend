@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using ImageAfricaProject.Data;
@@ -9,21 +8,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ImageAfricaProject.Repository.Generic
 {
-    public class GenericRepository<TEntity> : IGenericRepository<TEntity>
-        where TEntity : Entity
+    public class GenericBasicRepository<TEntity> : IGenericBasicRepository<TEntity>
+        where TEntity : class
     {
         public readonly ApplicationDbContext _dbContext;
 
-        public GenericRepository(ApplicationDbContext dbContext)
+        public GenericBasicRepository(ApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
         public  IQueryable<TEntity> GetAll()
         {
-            return _dbContext.Set<TEntity>().AsNoTracking()
-                .Where(a=>a.IsDeleted != true)
-                .OrderByDescending(a=>a.CreationTime);
+            return _dbContext.Set<TEntity>().AsNoTracking();
 
         }
 
@@ -32,20 +29,13 @@ namespace ImageAfricaProject.Repository.Generic
             return await _dbContext.Set<TEntity>()
                 .FindAsync(id);
         }
-        public  IQueryable<TEntity> Query()
+        public  DbSet<TEntity> Query()
         {
-            return _dbContext.Set<TEntity>()
-                .Where(a=>a.IsDeleted != true)
-                .OrderByDescending(a =>a.CreationTime);
+            return _dbContext.Set<TEntity>();
 
         }
 
-        public async Task<TEntity> Get(Expression<Func<TEntity, bool>> where)
-        {
-            return await _dbContext.Set<TEntity>()
-                .Where(a=>a.IsDeleted != true)
-                .FirstOrDefaultAsync(where);
-        }
+      
 
         public async Task Create(TEntity entity)
         {
@@ -57,8 +47,6 @@ namespace ImageAfricaProject.Repository.Generic
         }
         public async Task Update(TEntity entity)
         {
-            entity.LastModificationTime = DateTime.UtcNow;
-
             _dbContext.Set<TEntity>().Update(entity);
         }
 
@@ -66,20 +54,7 @@ namespace ImageAfricaProject.Repository.Generic
         {  
 
             var entity = await GetById(id);
-          
-
             _dbContext.Set<TEntity>().Remove(entity);
-        }
-        public async Task Delete(TEntity entity)
-        {
-            _dbContext.Set<TEntity>().Remove(entity);
-        }
-        public async Task SoftDelete(TEntity entity)
-        {
-            entity.DeletionTime = DateTime.UtcNow;
-            entity.LastModificationTime = DateTime.UtcNow;
-            entity.IsDeleted = true;
-            _dbContext.Set<TEntity>().Update(entity);
         }
           
         public async Task<bool> Save()

@@ -18,18 +18,20 @@ using Refit;
 
 namespace ImageAfricaProject.Repository
 {
-    public class UserRepository: GenericRepository<ApplicationUser>, IUserRepository
+    public class UserRepository: GenericBasicRepository<ApplicationUser>, IUserRepository
     {
         private UserManager<ApplicationUser> _userManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IConfiguration _config;
-      
+
         public UserRepository(ApplicationDbContext dbContext, UserManager<ApplicationUser> userManager, IHttpContextAccessor httpContextAccessor, IConfiguration config) : base(dbContext)
         {
+         
             _userManager = userManager;
             _httpContextAccessor = httpContextAccessor;
             _config = config;
         }
+
 
         public ApplicationUser CreateNewUser(UserDto user)
         {
@@ -86,5 +88,6 @@ namespace ImageAfricaProject.Repository
 
             return null;
         }
+    
     }
 }

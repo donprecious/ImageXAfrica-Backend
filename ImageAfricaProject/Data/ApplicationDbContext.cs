@@ -17,6 +17,10 @@ namespace ImageAfricaProject.Data
         public virtual DbSet<ImageView> ImageViews { get; set; }
         public virtual DbSet<ImageLike> ImageLikes { get; set; }
 
+        public virtual DbSet<FileInfo> FileInfos { get; set; }
+        public virtual DbSet<ImageColor> ImageColors { get; set; }
+        public virtual DbSet<Color> Colors { get; set; }
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
             {
@@ -38,6 +42,12 @@ namespace ImageAfricaProject.Data
 
             modelBuilder.Entity<ImageView>().HasOne(a => a.Image);
             modelBuilder.Entity<ImageView>().HasOne(a => a.Image);
+            modelBuilder.Entity<FileInfo>().HasOne(a => a.Image);
+           
+            modelBuilder.Entity<Color>();
+            modelBuilder.Entity<ImageColor>().HasOne(a => a.Image);
+            modelBuilder.Entity<ImageColor>().HasOne(a => a.Color);
+
 
             //comment if app is first run 
             //modelBuilder.Seed();

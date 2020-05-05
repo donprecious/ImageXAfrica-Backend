@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using AutoMapper;
 using ImageAfricaProject.Dto;
 using ImageAfricaProject.Dto.category;
+using ImageAfricaProject.Dto.color;
+using ImageAfricaProject.Dto.fileInfo;
 using ImageAfricaProject.Dto.image;
 using ImageAfricaProject.Dto.ImageTag;
 using ImageAfricaProject.Entities;
@@ -33,7 +35,25 @@ namespace ImageAfricaProject.Mapper
             CreateMap<ImageTag, ImageTagDto>();
          
             CreateMap<Tag, TagDto>();
-            CreateMap<Tag, TagDto>();
+            CreateMap<TagDto, Tag>();
+
+            CreateMap<FileInfo, FileInfoDto>();
+            CreateMap<FileInfoDto, FileInfo>();
+            
+            CreateMap<FileInfo, CreateFileInfoDto>();
+            CreateMap<CreateFileInfoDto, FileInfo>();
+  
+            CreateMap<FileInfo, GetFileInfoDto>();
+            CreateMap<GetFileInfoDto, FileInfo>();
+
+            CreateMap<Color, ColorDto>();
+            CreateMap<ColorDto, Color>();
+
+            CreateMap<Color, CreateColorDto>();
+            CreateMap<CreateColorDto, Color>();
+            
+            CreateMap<ImageColor, ImageColorDto>();
+            CreateMap<ImageColorDto, ImageColor>();
         }
     }
 }

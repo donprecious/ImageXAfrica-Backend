@@ -10,11 +10,10 @@ using ImageAfricaProject.Repository.Generic;
 
 namespace ImageAfricaProject.Repository
 {
-    public interface IUserRepository : IGenericRepository<ApplicationUser>
+    public interface IUserRepository : IGenericBasicRepository<ApplicationUser>
     {
         ApplicationUser CreateNewUser(UserDto user);
         Task<ApplicationUser> GetCurrentUserAsync();
-
         Task<GoogleJsonWebSignature.Payload> ValidateGooglePayLoad(string tokenId);
         Task<UserResponseFbDto> GetFacebookUser(string userId, string token);
     }

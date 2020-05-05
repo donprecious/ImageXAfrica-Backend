@@ -4,7 +4,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using ImageAfricaProject.Dto.color;
+using ImageAfricaProject.Dto.fileInfo;
 using ImageAfricaProject.Entities;
+using FileInfo = System.IO.FileInfo;
 
 namespace ImageAfricaProject.Dto.image
 {
@@ -25,6 +28,14 @@ namespace ImageAfricaProject.Dto.image
         public string UserId { get; set; }
       
         public string FileType { get; set; }
-        public List<string> Tag { get; set; }
+        public List<string> Tag { get; set; } 
+
+        [IgnoreMap]
+        public List<CreateColorDto> Colors { get; set; }
+
+        [IgnoreMap]
+        public CreateFileInfoDto FileInfo { get; set; }
+
+        
     }
 }

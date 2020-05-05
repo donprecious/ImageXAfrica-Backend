@@ -137,6 +137,7 @@ namespace ImageAfricaProject
             });
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddScoped(typeof(IGenericBasicRepository<>), typeof(GenericBasicRepository<>));
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IImageRepository, ImageRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -146,6 +147,9 @@ namespace ImageAfricaProject
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<IEmailTemplateProvider, EmailTemplateProvider>();
+            services.AddScoped<IFileInfoRepository, FileInfoRepository>();
+            services.AddScoped<IColorRepository, ColorRepository>();
+            services.AddScoped<IImageColorRepository, ImageColorRepository>();
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddHttpContextAccessor();
 
