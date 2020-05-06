@@ -27,6 +27,11 @@ namespace ImageAfricaProject.Repository
             return like;
         }
 
+        public async Task RemoveImageLike(ImageLike like)
+        {
+            _dbContext.ImageLikes.Remove(like);
+            
+        }
         public IQueryable<ImageLike> QueryLikes()
         {
             return _dbContext.ImageLikes.AsQueryable();

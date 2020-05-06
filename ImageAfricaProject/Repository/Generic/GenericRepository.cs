@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using ImageAfricaProject.Data;
@@ -20,7 +21,9 @@ namespace ImageAfricaProject.Repository.Generic
 
         public  IQueryable<TEntity> GetAll()
         {
-            return _dbContext.Set<TEntity>().AsNoTracking();
+            return _dbContext.Set<TEntity>().AsNoTracking()
+                .Where(a=>a.IsDeleted != true)
+                .OrderByDescending(a=>a.CreationTime);
 
         }
 
@@ -29,13 +32,20 @@ namespace ImageAfricaProject.Repository.Generic
             return await _dbContext.Set<TEntity>()
                 .FindAsync(id);
         }
-        public  DbSet<TEntity> Query()
+        public  IQueryable<TEntity> Query()
         {
-            return _dbContext.Set<TEntity>();
+            return _dbContext.Set<TEntity>()
+                .Where(a=>a.IsDeleted != true)
+                .OrderByDescending(a =>a.CreationTime);
 
         }
 
-      
+        public async Task<TEntity> Get(Expression<Func<TEntity, bool>> where)
+        {
+            return await _dbContext.Set<TEntity>()
+                .Where(a=>a.IsDeleted != true)
+                .FirstOrDefaultAsync(where);
+        }
 
         public async Task Create(TEntity entity)
         {
@@ -56,10 +66,20 @@ namespace ImageAfricaProject.Repository.Generic
         {  
 
             var entity = await GetById(id);
-            entity.DeletionTime = DateTime.UtcNow;
-            entity.LastModificationTime = DateTime.UtcNow;
+          
 
             _dbContext.Set<TEntity>().Remove(entity);
+        }
+        public async Task Delete(TEntity entity)
+        {
+            _dbContext.Set<TEntity>().Remove(entity);
+        }
+        public async Task SoftDelete(TEntity entity)
+        {
+            entity.DeletionTime = DateTime.UtcNow;
+            entity.LastModificationTime = DateTime.UtcNow;
+            entity.IsDeleted = true;
+            _dbContext.Set<TEntity>().Update(entity);
         }
           
         public async Task<bool> Save()

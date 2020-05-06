@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using ImageAfricaProject.Dto;
 using ImageAfricaProject.Dto.category;
-using ImageAfricaProject.Dto.challenge;
 using ImageAfricaProject.Dto.image;
 using ImageAfricaProject.Dto.ImageTag;
 using ImageAfricaProject.Entities;
@@ -35,12 +34,6 @@ namespace ImageAfricaProject.Mapper
          
             CreateMap<Tag, TagDto>();
             CreateMap<Tag, TagDto>();
-
-            CreateMap<Challenge, GetChallengeDto>();
-            CreateMap<CreateChallengeDto, Challenge>();
-            CreateMap<Challenge, UpdateChallengeDto>();
-            CreateMap<UpdateChallengeDto, Challenge>();
-            CreateMap<UserChallengeDto, UserChallenge>();
         }
     }
 }

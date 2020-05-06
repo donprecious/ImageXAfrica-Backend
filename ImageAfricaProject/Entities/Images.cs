@@ -36,6 +36,7 @@ namespace ImageAfricaProject.Entities
         }
         
         public ICollection<ImageTag> ImageTag { get; set; }
+
  
     }
 }

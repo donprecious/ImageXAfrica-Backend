@@ -2,7 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.Configuration.Annotations;
 using ImageAfricaProject.Dto.category;
+using ImageAfricaProject.Dto.color;
+using ImageAfricaProject.Dto.fileInfo;
 using ImageAfricaProject.Dto.ImageTag;
 using ImageAfricaProject.Entities;
 
@@ -28,5 +32,10 @@ namespace ImageAfricaProject.Dto.image
         public  CategoryDto Category { get; set; }
 
         public List<ImageTagDto> ImageTag { get; set; }
+
+        [IgnoreMap]
+        public GetFileInfoDto FileInfo { get; set; }
+        [IgnoreMap]
+        public List<ColorDto> Colors { get; set; }
     }
 }
