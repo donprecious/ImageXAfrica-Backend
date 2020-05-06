@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ImageAfricaProject.Entities
 {
-    public class Challenge: Entity, IFullAuditable
+    public class Challenge: Entity
     {
         public string Name { get; set; }
         public string  Description { get; set; }
