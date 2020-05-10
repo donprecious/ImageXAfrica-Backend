@@ -115,6 +115,7 @@ namespace ImageAfricaProject.Controllers
 
             var user = await _userRepository.GetCurrentUserAsync();
             challenge.LastModifierUserId = user.Id;
+            challenge.LastModificationTime = DateTime.UtcNow;
 
             var saveChanges = await _challengeRepository.Save();
             if (!saveChanges)

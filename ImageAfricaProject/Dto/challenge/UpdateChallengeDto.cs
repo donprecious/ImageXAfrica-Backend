@@ -7,10 +7,6 @@ namespace ImageAfricaProject.Dto.challenge
 {
     public class UpdateChallengeDto
     {
-        public UpdateChallengeDto()
-        {
-            LastModificationTime = DateTime.UtcNow;
-        }
         public string Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
@@ -22,7 +18,5 @@ namespace ImageAfricaProject.Dto.challenge
         public int SecondWinnerImageId { get; set; }
         public string OrganizerName { get; set; }
         public string OrganizerUrl { get; set; }
-        public DateTime LastModificationTime { get; set; }
-        public string LastModifierUserId { get; set; }
     }
 }

@@ -92,14 +92,11 @@ namespace ImageAfricaProject.Repository
         {
             try
             {
-                DateTime thirtyDaysAgo = DateTime.Now.AddDays(-30);
+                DateTime thirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
             var imageViews = from ImageView in _dbContext.ImageViews
                              join Images in _dbContext.Images
                              on ImageView.ImageId equals Images.Id
                              select new { ImageView.Id, ImageView.ImageId, UserId = Images.UserId, Images.CreationTime };
-
-            //var iV = _dbContext.ImageViews.Where(a => a.ImageId == a.Image.Id)
-            //  .Select(a => new { a.Id, a.ImageId, a.Image.UserId, a.Image.CreationTime}).ToList();
            
                 var user = (from User in _dbContext.Users
                             join ImageView in imageViews
@@ -112,7 +109,7 @@ namespace ImageAfricaProject.Repository
                                 UserName = User.UserName,
                                 FirstName = User.FirstName,
                                 LastName = User.LastName,
-                                Id = User.Id,
+                                Id = Convert.ToInt32(User.Id),
                                 ImageViewCounts = imageViewCount,
                                 Images = new List<object>()
                             }).Distinct().ToList();
@@ -127,7 +124,7 @@ namespace ImageAfricaProject.Repository
 
                 foreach (var image in images)
                 {
-                    UserLeaderBoardDto User = user.Where(a => a.Id == image.UserId).FirstOrDefault();
+                    UserLeaderBoardDto User = user.Where(a => a.Id.ToString() == image.UserId).FirstOrDefault();
                     var ul = User.Images;
                     ul.Add(image);
                 };
@@ -144,7 +141,7 @@ namespace ImageAfricaProject.Repository
         }
         public async Task<List<UserLeaderBoardDto>> GetAllTimeLeaderboard()
         {
-            DateTime thirtyDaysAgo = DateTime.Now.AddDays(-30);
+            DateTime thirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
             var imageViews = from ImageView in _dbContext.ImageViews
                              join Images in _dbContext.Images
                              on ImageView.ImageId equals Images.Id
@@ -161,7 +158,7 @@ namespace ImageAfricaProject.Repository
                             UserName = User.UserName,
                             FirstName = User.FirstName,
                             LastName = User.LastName,
-                            Id = User.Id,
+                            Id = Convert.ToInt32(User.Id),
                             ImageViewCounts = imageViewCount,
                             Images = new List<object>()
                         }).Distinct().ToList();
@@ -176,7 +173,7 @@ namespace ImageAfricaProject.Repository
 
             foreach (var image in images)
             {
-                UserLeaderBoardDto User = user.Where(a => a.Id == image.UserId).FirstOrDefault();
+                UserLeaderBoardDto User = user.Where(a => a.Id.ToString() == image.UserId).FirstOrDefault();
                 var ul = User.Images;
                 ul.Add(image);
             };

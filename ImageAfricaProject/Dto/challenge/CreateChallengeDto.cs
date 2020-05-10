@@ -8,10 +8,6 @@ namespace ImageAfricaProject.Dto.challenge
 {
     public class CreateChallengeDto
     {
-        public CreateChallengeDto()
-        {
-            CreationTime = DateTime.UtcNow;
-        }
         [Required(ErrorMessage = "Title Required")]
         public string Name { get; set; }
         public string Description { get; set; }
