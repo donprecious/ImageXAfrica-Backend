@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ImageAfricaProject.Entities
 {
-    public class Images : Entity, IFullAuditable
+    public class Images : Entity
     {
         public Images()
         {
@@ -24,7 +24,7 @@ namespace ImageAfricaProject.Entities
         public double GeoLog {get;set;}
         public int CategoryId{get;set;}
         public string UserId { get; set; }
-        public bool IsVideo { get; set; }
+  
         public string FileType { get; set; }
         [ForeignKey("CategoryId")]
         public Category Category {get;set;}
@@ -36,11 +36,7 @@ namespace ImageAfricaProject.Entities
         }
         
         public ICollection<ImageTag> ImageTag { get; set; }
-        public string CreatorUserId { get; set; }
-        public DateTime? LastModificationTime { get; set; }
-        public string LastModifierUserId { get; set; }
-        public bool IsDeleted { get; set; }
-        public DateTime? DeletionTime { get; set; }
-        public string DeleterUserId { get; set; }
+
+ 
     }
 }

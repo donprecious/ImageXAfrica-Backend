@@ -1,21 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-
 using ImageAfricaProject.Data;
-using ImageAfricaProject.Data.Interface;
 
-namespace ImageAfricaProject.Entities
+namespace ImageAfricaProject.Dto.color
 {
-    public  class Category:  Entity
+    public class ColorDto: EntityDto
     {
+        public string Code { get; set; }
         public string Name { get; set; }
-        public string Description { get; set; }
-
-
     }
-
- 
 }

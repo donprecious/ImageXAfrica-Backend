@@ -125,8 +125,19 @@ namespace ImageAfricaProject
             });
 
             services.AddAutoMapper(typeof(Startup));
-           
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: "AllowAll",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin();
+                        builder.AllowAnyHeader();
+                        builder.AllowAnyMethod();
+                    });
+            });
+
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddScoped(typeof(IGenericBasicRepository<>), typeof(GenericBasicRepository<>));
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IImageRepository, ImageRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -136,6 +147,9 @@ namespace ImageAfricaProject
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<IEmailTemplateProvider, EmailTemplateProvider>();
+            services.AddScoped<IFileInfoRepository, FileInfoRepository>();
+            services.AddScoped<IColorRepository, ColorRepository>();
+            services.AddScoped<IImageColorRepository, ImageColorRepository>();
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped<IChallengeRepository, ChallengeRepository>();
             services.AddHttpContextAccessor();
@@ -164,11 +178,7 @@ namespace ImageAfricaProject
             app.UseRouting();
             
             // global cors policy
-            app.UseCors(x => x
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                );
+            app.UseCors("AllowAll");
 
             app.UseAuthentication();
             app.UseAuthorization();

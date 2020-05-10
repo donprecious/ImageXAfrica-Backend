@@ -4,14 +4,16 @@ using ImageAfricaProject.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ImageAfricaProject.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200422003338_remove-IsVideo-property")]
+    partial class removeIsVideoproperty
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -202,114 +204,6 @@ namespace ImageAfricaProject.Data.Migrations
                     b.ToTable("ContentCollections");
                 });
 
-            modelBuilder.Entity("ImageAfricaProject.Entities.FileInfo", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Artist")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatorUserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DeleterUserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Duration")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FileSize")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Genre")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Height")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ImageId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastModifierUserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Model")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Software")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Width")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ImageId");
-
-                    b.ToTable("FileInfos");
-                });
-
-            modelBuilder.Entity("ImageAfricaProject.Entities.ImageColor", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("ColorId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatorUserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DeleterUserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ImageId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastModifierUserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Level")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ColorId");
-
-                    b.HasIndex("ImageId");
-
-                    b.ToTable("ImageColors");
-                });
-
             modelBuilder.Entity("ImageAfricaProject.Entities.ImageLike", b =>
                 {
                     b.Property<int>("Id")
@@ -320,26 +214,8 @@ namespace ImageAfricaProject.Data.Migrations
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatorUserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DeleterUserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("ImageId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastModifierUserId")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -406,26 +282,8 @@ namespace ImageAfricaProject.Data.Migrations
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatorUserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DeleterUserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("ImageId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastModifierUserId")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -535,31 +393,6 @@ namespace ImageAfricaProject.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tags");
-                });
-
-            modelBuilder.Entity("ImageAfricaProject.Entities.UserChallenge", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("ChallengeId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("JoinedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChallengeId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserChallenges");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -679,30 +512,6 @@ namespace ImageAfricaProject.Data.Migrations
                         .HasForeignKey("UserId");
                 });
 
-            modelBuilder.Entity("ImageAfricaProject.Entities.FileInfo", b =>
-                {
-                    b.HasOne("ImageAfricaProject.Entities.Images", "Image")
-                        .WithMany()
-                        .HasForeignKey("ImageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ImageAfricaProject.Entities.ImageColor", b =>
-                {
-                    b.HasOne("ImageAfricaProject.Entities.Color", "Color")
-                        .WithMany()
-                        .HasForeignKey("ColorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ImageAfricaProject.Entities.Images", "Image")
-                        .WithMany()
-                        .HasForeignKey("ImageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("ImageAfricaProject.Entities.ImageLike", b =>
                 {
                     b.HasOne("ImageAfricaProject.Entities.Images", "Image")
@@ -745,19 +554,6 @@ namespace ImageAfricaProject.Data.Migrations
                     b.HasOne("ImageAfricaProject.Entities.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ImageAfricaProject.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-                });
-
-            modelBuilder.Entity("ImageAfricaProject.Entities.UserChallenge", b =>
-                {
-                    b.HasOne("ImageAfricaProject.Entities.Challenge", "Challenge")
-                        .WithMany()
-                        .HasForeignKey("ChallengeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

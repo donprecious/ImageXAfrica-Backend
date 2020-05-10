@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ImageAfricaProject.Entities
 {
-    public class Challenge: Entity, IFullAuditable
+    public class Challenge: Entity
     {
         public string Name { get; set; }
         public string  Description { get; set; }
@@ -19,11 +19,5 @@ namespace ImageAfricaProject.Entities
         public int SecondWinnerImageId { get; set; }
         public string OrganizerName { get; set; }
         public string OrganizerUrl { get; set; }
-        public string CreatorUserId { get; set; }
-        public DateTime? LastModificationTime { get; set; }
-        public string LastModifierUserId { get; set; }
-        public bool IsDeleted { get; set; }
-        public DateTime? DeletionTime { get; set; }
-        public string DeleterUserId { get; set; }
     }
 }
