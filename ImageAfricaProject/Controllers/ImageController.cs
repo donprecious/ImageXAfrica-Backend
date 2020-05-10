@@ -244,13 +244,7 @@ namespace ImageAfricaProject.Controllers
             });
         }
 
-            await _imageRepository.SoftDelete(image);
-            await _imageRepository.Save();
-            return Ok(new ResponseDto
-            {
-                Status = ResponseStatus.Success
-            });
-        }
+         
 
         [HttpPost]
         public async Task<IActionResult> CreateCollection([FromBody] ContentCollectionDto collectionDto)
@@ -290,13 +284,7 @@ namespace ImageAfricaProject.Controllers
            });
         }
 
-           await _contentCollectionRepository.Delete(collection);
-           await _contentCollectionRepository.Save();
-           return Ok(new ResponseDto
-           {
-               Status = ResponseStatus.Success
-           });
-        }
+         
 
         [HttpPost]
         public async Task<IActionResult> Like([FromBody] ImageLike like)
