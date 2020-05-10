@@ -10,7 +10,6 @@ namespace ImageAfricaProject.Repository
   public  interface IImageRepository : IGenericRepository<Images>
   {
       Task<ImageView> AddImageViews(ImageView view);
-      
       Task<ImageLike> AddImageLike(ImageLike like);
       IQueryable<ImageLike> QueryLikes();
       IQueryable<ImageView> QueryViews();

@@ -22,7 +22,7 @@ using WebApi.Models;
 
 namespace ImageAfricaProject.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     [ApiController]
     [ValidateModel]
     public class AuthController : ControllerBase
@@ -48,7 +48,7 @@ namespace ImageAfricaProject.Controllers
             _jwtOptions = jwtOptions.Value;
         }
 
-        [HttpPost]
+        [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] AuthenticateModel model)
         {
             var identity = await GetClaimsIdentity(model.Email, model.Password);
@@ -95,7 +95,7 @@ namespace ImageAfricaProject.Controllers
 
         }
 
-        [HttpPost]
+        [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] CreateUserDto model)
         {
             var mappedUser = _mapper.Map<ApplicationUser>(model);
@@ -117,7 +117,7 @@ namespace ImageAfricaProject.Controllers
         }
 
         [Authorize]
-        [HttpGet]
+        [HttpGet("current-user")]
         public async Task<IActionResult> GetCurrentUser()
         {
             var user = await _userRepository.GetCurrentUserAsync();
@@ -126,7 +126,7 @@ namespace ImageAfricaProject.Controllers
         }
         
         [AllowAnonymous]
-        [HttpPost]
+        [HttpPost("google")]
         public async Task<IActionResult> GoogleAuth([FromBody] GoogleLoginDto externalLogin)
         {
             var payLoad = await _userRepository.ValidateGooglePayLoad(externalLogin.IdToken);
@@ -198,15 +198,250 @@ namespace ImageAfricaProject.Controllers
                         user = mappedUser,
                         message = "success, please redirect user to setup his password"
                     };
-                    return Ok(response);
+                    return Ok(new ResponseDto()
+                    {
+                        Data = response,
+                        Status = ResponseStatus.Success
+                    });
                   
                 }
             }
 
             return StatusCode(500, "something went wrong");
 
-        } 
+        }
 
+        [AllowAnonymous]
+        [HttpPost("facebook")]
+        public async Task<IActionResult> FacebookAuth([FromBody] FacebookLoginDto facebookLoginDto)
+        {
+            var payLoad = await _userRepository.GetFacebookUser(facebookLoginDto.UserId, facebookLoginDto.Token);
+            //var info = await _signInManager.GetExternalLoginInfoAsync();
+
+            if (payLoad == null)
+            {
+                return Unauthorized(
+                    "Sorry, we cannot validate your info, from facebook, please try another login provider");
+            }
+
+            //  find user by email if he exists 
+            var user = await _userManager.FindByEmailAsync(payLoad.email);
+
+            if (user != null)
+            {
+
+
+                user.EmailConfirmed = true;
+                if (string.IsNullOrEmpty(user.ProfileImageUrl))
+                {
+                    user.ProfileImageUrl = payLoad.picture.data.url;
+                }
+            }
+
+            return StatusCode(500, "something went wrong");
+        }
+
+        [HttpGet("confirmation/resend")]
+        public async Task<IActionResult> ResendConfirmationEmail(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                NotFound(new
+                {
+                    status = "fail",
+                    message = "invalid user email"
+                });
+            }
+
+            if (user.EmailConfirmed)
+            {
+                return BadRequest(new
+                {
+                    status = "fail",
+                    message = "email already confirmed"
+                });
+            }
+
+            var callbackUrl = await GenerateToken(user, "confirmation", "confirm");
+
+            await _emailService.SendConfirmationEmail(user.Email, callbackUrl);
+
+            return Ok(new
+            {
+                status = "success",
+                message = "email confirmation link has been sent"
+            });
+        }
+
+        private async Task<string> GenerateToken(ApplicationUser user, string tokenType, string method)
+        {
+            var token = "";
+            if (tokenType == "confirmation")
+            {
+                token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            }
+
+            if (tokenType == "reset")
+            {
+                token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            }
+
+            //token = HttpUtility.UrlEncode(token);
+
+            var fontEndUrl = _config.GetSection("FrontEnd.BaseUrl").Value;
+            var url = $"{fontEndUrl}/{method}/?userId={user.Email}&token={token}";
+            return url;
+        }
+
+        [HttpGet("confirm")]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (userId == null || token == null)
+            {
+                return BadRequest(new
+                {
+                    status = "fail",
+                    message = "token is invalid or has expired"
+                });
+            }
+
+            var user = await _userManager.FindByEmailAsync(userId);
+            if (user == null)
+            {
+                return BadRequest(new
+                {
+                    status = "fail",
+                    message = $"invalid user {userId}"
+                });
+            }
+
+            if (user.EmailConfirmed)
+            {
+                return BadRequest(new
+                {
+                    status = "fail",
+                    message = "email already confirmed"
+                });
+            }
+
+            token = token.Replace(" ", "+");
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+
+            if (result.Succeeded)
+            {
+                return Ok(new ResponseDto()
+                {
+                    Status = ResponseStatus.Success,
+                    Message = "confirmed successfully"
+                });
+            }
+
+            return BadRequest(new
+            {
+                status = "fail",
+                message = "token is invalid or has expired"
+            });
+        }
+
+        [HttpPost("password/forgot")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto forgotPasswordDto)
+        {
+            var user = await _userManager.FindByEmailAsync(forgotPasswordDto.Email);
+
+            if (user == null)
+            {
+                return Ok(new
+                {
+                    status = "success",
+                    message = "reset password link has been sent"
+                });
+            }
+
+          
+
+            var callbackUrl = await GenerateToken(user, "reset", "ResetPassword");
+
+            await _emailService.SendForgetPasswordEmail(user.Email, callbackUrl);
+
+            return Ok(new
+            {
+                status = "success",
+                message = "reset password link has been sent"
+            });
+        }
+
+        [HttpPatch("password/reset")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
+        {
+            if (resetPasswordDto.UserId == null || resetPasswordDto.Token == null)
+            {
+                return BadRequest(new
+                {
+                    status = "fail",
+                    message = "token is invalid or has expired"
+                });
+            }
+
+            var user = await _userManager.FindByEmailAsync(resetPasswordDto.UserId);
+            if (user == null)
+            {
+                return BadRequest(new
+                {
+                    status = "fail",
+                    message = "token is invalid or has expired"
+                });
+            }
+
+            var token = resetPasswordDto.Token.Replace(" ","+");
+
+            var update = await _userManager.ResetPasswordAsync(user, token, resetPasswordDto.Password);
+
+            if (update.Succeeded)
+            {
+                return Ok(new
+                {
+                    status = "success",
+                    message = "password was changed"
+                });
+            }
+
+            return BadRequest(new
+            {
+                status = "error",
+                message = "password not changed",
+                errors = update.Errors
+            });
+        }
+
+        [Authorize]
+        [HttpPatch("password/change")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
+        {
+            var user = await _userRepository.GetCurrentUserAsync();
+            if (user == null) return Unauthorized("User Not Authorized");
+
+            var result = await _userManager.ChangePasswordAsync(user, changePasswordDto.CurrentPassword,
+                changePasswordDto.NewPassword);
+
+            if (result.Succeeded)
+            {
+                return Ok(new
+                {
+                    status = "success",
+                    message = "password has been updated"
+                });
+            }
+
+            return BadRequest(new
+            {
+                status = "error",
+                message = "password not updated",
+                errors = result.Errors
+            });
+        }
 
     }
 }
