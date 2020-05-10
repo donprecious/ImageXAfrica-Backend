@@ -11,6 +11,7 @@ namespace ImageAfricaProject.Repository
   {
       Task<ImageView> AddImageViews(ImageView view);
       Task<ImageLike> AddImageLike(ImageLike like);
+      Task RemoveImageLike(ImageLike like);
       IQueryable<ImageLike> QueryLikes();
       IQueryable<ImageView> QueryViews();
   }

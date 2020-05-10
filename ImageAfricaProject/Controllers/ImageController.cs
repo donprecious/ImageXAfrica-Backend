@@ -5,19 +5,25 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using AutoMapper;
+using ImageAfricaProject.Dto;
+using ImageAfricaProject.Dto.color;
 using ImageAfricaProject.Dto.contentCollection;
+using ImageAfricaProject.Dto.fileInfo;
 using ImageAfricaProject.Dto.image;
 using ImageAfricaProject.Dto.ImageTag;
+using ImageAfricaProject.Dto.like;
 using ImageAfricaProject.Entities;
 using ImageAfricaProject.Helpers;
 using ImageAfricaProject.Repository;
+using ImageAfricaProject.Services;
+using ImageAfricaProject.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Services;
+using FileInfo = ImageAfricaProject.Entities.FileInfo;
 
 namespace ImageAfricaProject.Controllers
 {
@@ -33,7 +39,13 @@ namespace ImageAfricaProject.Controllers
         private IContentCollectionRepository _contentCollectionRepository;
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
-        public ImageController(IImageRepository imageRepository, IMapper mapper, ITagRepository tagRepository, IImageTagRepository imagetagRepository, IUserRepository userRepository, IContentCollectionRepository contentCollectionRepository)
+        private IFileInfoRepository _fileInfoRepository;
+        private IImageColorRepository _imageColorRepository;
+        private IColorRepository _colorRepository;
+        
+        public ImageController(IImageRepository imageRepository, IMapper mapper, ITagRepository tagRepository, IImageTagRepository imagetagRepository, IUserRepository userRepository, IContentCollectionRepository contentCollectionRepository, IFileInfoRepository fileInfoRepository, 
+            IImageColorRepository imageColorRepository, 
+            IColorRepository colorRepository)
         {
             _imageRepository = imageRepository;
             _mapper = mapper;
@@ -41,6 +53,9 @@ namespace ImageAfricaProject.Controllers
             _imagetagRepository = imagetagRepository;
             _userRepository = userRepository;
             _contentCollectionRepository = contentCollectionRepository;
+            _fileInfoRepository = fileInfoRepository;
+            _imageColorRepository = imageColorRepository;
+            _colorRepository = colorRepository;
         }
 
         [HttpGet]
@@ -60,23 +75,37 @@ namespace ImageAfricaProject.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Get(int id)
         {
-            var images = _imageRepository.Query().Where(a=>a.Id == id).Include(a=>a.Category)
-                .Include(a=>a.User)
-                .Include(a=>a.ImageTag).
-                ThenInclude(tg=>tg.Tag)
-                .FirstOrDefault();
+            var images = _imageRepository.Query().Where(a=>a.Id == id)
+                                            .Include(a=>a.Category)
+                                            .Include(a=>a.User)
+                                            .Include(a=>a.ImageTag).
+                                            ThenInclude(tg=>tg.Tag)
+                                            .FirstOrDefault();
+            if (images == null)
+            {
+               return NotFound("No images Found");
+            }
             var mapped = _mapper.Map<GetImageDto>(images);
           await  _imageRepository.AddImageViews(new ImageView()
             {
                 ImageId = mapped.Id
             });
+
           await _imageRepository.Save();
-            return Ok(mapped);
+          var colors = _imageColorRepository.Query()
+                                .Where(a => a.ImageId == mapped.Id)
+                                .Select(a => a.Color)
+                                .ToList();
+          var fileInfo = await _fileInfoRepository.Query().FirstOrDefaultAsync(a => a.ImageId == mapped.Id);
+
+          mapped.Colors = _mapper.Map<List<ColorDto>>(colors);
+          mapped.FileInfo = _mapper.Map<GetFileInfoDto>(fileInfo);
+          return Ok(mapped);
         }
        
         [HttpPost]
         [AllowAnonymous]
-        [DisableCors]
+      
         public async Task<IActionResult> UploadFiles()
         {
             var file = Request.Form.Files[0];
@@ -111,13 +140,11 @@ namespace ImageAfricaProject.Controllers
         
         public async Task<IActionResult> Create([FromBody] List<CreateImageDto> createImageDto)
         {
-            
-            var mapped = _mapper.Map<List<Images>>(createImageDto);
-
-            await _imageRepository.CreateMany(mapped);
-            await _imageRepository.Save();
-            foreach (var i in mapped)
+            foreach (var i in createImageDto)
             {
+                var mapped = _mapper.Map<Images>(i);
+                await _imageRepository.Create(mapped);
+                await _imageRepository.Save();
                 var tag = createImageDto.FirstOrDefault(a => a.ImageUrl.ToLower() == i.ImageUrl.ToLower());
                 if (tag != null)
                 {
@@ -136,7 +163,7 @@ namespace ImageAfricaProject.Controllers
                           await  _imagetagRepository.Create(new ImageTag()
                             {
                                 TagId = newTag.Id,
-                                ImageId = i.Id
+                                ImageId = mapped.Id
                             });
                           await _imagetagRepository.Save();
                         }
@@ -145,16 +172,76 @@ namespace ImageAfricaProject.Controllers
                             await  _imagetagRepository.Create(new ImageTag()
                             {
                                 TagId = findTag.Id,
-                                ImageId = i.Id
+                                ImageId = mapped.Id
                             });
                             await _imagetagRepository.Save();
 
                         }
                     }
                 }
-                //find tag by name 
+                //find tag by name  
+                //create file info 
+                var fileInfo = _mapper.Map<FileInfo>(i.FileInfo);
+                if (fileInfo != null)
+                {
+                    fileInfo.ImageId = mapped.Id;
+
+                    await _fileInfoRepository.Create(fileInfo);
+                    await _fileInfoRepository.Save();
+                }
+               
+
+                //create color 
+                //find if color does not exist 
+                foreach (var color in i.Colors)
+                {
+                    var mappedColor = _mapper.Map<Color>(color);
+                    var findcolor = await _colorRepository.Query().FirstOrDefaultAsync(a => a.Code == mappedColor.Code);
+                    var imageColor = new ImageColor()
+                    {
+                        ImageId = mapped.Id,
+                        Level = color.Level
+                    };
+                    if (findcolor == null)
+                    {
+                        //create that color 
+                       await _colorRepository.Create(mappedColor);
+                       await _colorRepository.Save();
+                       imageColor.ColorId = mappedColor.Id;
+                    }
+                    else
+                    {
+                        imageColor.ColorId = findcolor.Id;
+                    }
+                    //add color to ImageColorTable 
+                   await _imageColorRepository.Create(imageColor);
+                   await _imageColorRepository.Save();
+
+                }
+
             }
-            return StatusCode(201, mapped);
+            return StatusCode(201);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var image = await _imageRepository.GetById(id);
+            if(image == null)
+            {
+                return NotFound(new ResponseDto
+                {
+                    Status = ResponseStatus.Fail,
+                    Message = "No Record found"
+                });
+            }
+
+            await _imageRepository.SoftDelete(image);
+            await _imageRepository.Save();
+            return NotFound(new ResponseDto
+            {
+                Status = ResponseStatus.Success
+            });
         }
 
             await _imageRepository.SoftDelete(image);
@@ -182,6 +269,26 @@ namespace ImageAfricaProject.Controllers
             return Ok(mapped);
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCollection(int id)
+        {
+            var collection = await _contentCollectionRepository.Get(a=>a.ImageId == id);
+            if(collection == null)
+            {
+                return NotFound(new ResponseDto
+                {
+                    Status = ResponseStatus.Fail,
+                    Message = "No Record found"
+                });
+            }
+
+           await _contentCollectionRepository.Delete(collection);
+           await _contentCollectionRepository.Save();
+           return NotFound(new ResponseDto
+           {
+               Status = ResponseStatus.Success
+           });
+        }
 
            await _contentCollectionRepository.Delete(collection);
            await _contentCollectionRepository.Save();
@@ -200,12 +307,61 @@ namespace ImageAfricaProject.Controllers
           
             if(hasAny) 
             {
-                return  BadRequest("Content already added to collection");
+                return  Ok(new ResponseDto()
+                {
+                    Message = "content liked already",
+                    Status = ResponseStatus.Success
+                });
             }
 
             await _imageRepository.AddImageLike(like);
             await _imageRepository.Save();
-            return Ok(like);
+            return Ok(
+                new ResponseDto()
+                {
+                    Status = ResponseStatus.Success,
+                    Data =   like
+                });
+        } 
+
+        [HttpPost]
+        public async Task<IActionResult> LikeToggle([FromBody] CreateLikeDto like)
+        {
+            var hasAny = await _imageRepository.QueryLikes()
+                .FirstOrDefaultAsync(a=>a.ImageId == like.ImageId
+                             && a.UserId == like.UserId);
+          
+            if(hasAny != null)
+            {
+                await _imageRepository.RemoveImageLike(hasAny);
+                await _imageRepository.Save();
+                return  Ok(new ResponseDto()
+                {
+                    Message = "unliked",
+                    Status = ResponseStatus.Success,
+                    Data = new
+                    {
+                        liked = false
+                    }
+                });
+             
+            }
+
+            await _imageRepository.AddImageLike(new ImageLike()
+            {
+                UserId =  like.UserId,
+                ImageId = like.ImageId
+            });
+            await _imageRepository.Save();
+            return Ok(new ResponseDto()
+            {
+                Message = "liked",
+                Status = ResponseStatus.Success,
+                Data = new
+                {
+                    liked = true
+                }
+            });
         } 
 
         [AllowAnonymous]

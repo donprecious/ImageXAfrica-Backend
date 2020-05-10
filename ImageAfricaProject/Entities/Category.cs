@@ -9,17 +9,12 @@ using ImageAfricaProject.Data.Interface;
 
 namespace ImageAfricaProject.Entities
 {
-    public  class Category:  Entity, IFullAuditable
+    public  class Category:  Entity
     {
         public string Name { get; set; }
         public string Description { get; set; }
 
-        public string CreatorUserId { get; set; }
-        public DateTime? LastModificationTime { get; set; }
-        public string LastModifierUserId { get; set; }
-        public bool IsDeleted { get; set; }
-        public DateTime? DeletionTime { get; set; }
-        public string DeleterUserId { get; set; }
+
     }
 
  

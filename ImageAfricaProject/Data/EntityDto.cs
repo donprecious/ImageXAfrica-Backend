@@ -8,8 +8,6 @@ namespace ImageAfricaProject.Data
     public class EntityDto
     {
         public int Id { get; set; }
-
-    
         public DateTime CreationTime { get; set; }
     }
 }
