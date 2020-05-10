@@ -251,7 +251,7 @@ namespace ImageAfricaProject.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost]
+        [HttpPost("facebook")]
         public async Task<IActionResult> FacebookAuth([FromBody] FacebookLoginDto facebookLoginDto)
         {
             var payLoad = await _userRepository.GetFacebookUser(facebookLoginDto.UserId, facebookLoginDto.Token);
@@ -341,7 +341,7 @@ namespace ImageAfricaProject.Controllers
             return StatusCode(500, "something went wrong");
         }
 
-        [HttpGet("resend-confirmation")]
+        [HttpGet("confirmation/resend")]
         public async Task<IActionResult> ResendConfirmationEmail(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -446,7 +446,7 @@ namespace ImageAfricaProject.Controllers
             });
         }
 
-        [HttpPost("forgot")]
+        [HttpPost("password/forgot")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordDto forgotPasswordDto)
         {
             var user = await _userManager.FindByEmailAsync(forgotPasswordDto.Email);
@@ -480,7 +480,7 @@ namespace ImageAfricaProject.Controllers
             });
         }
 
-        [HttpPatch("reset")]
+        [HttpPatch("password/reset")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
         {
             if (resetPasswordDto.UserId == null || resetPasswordDto.Token == null)
@@ -524,7 +524,7 @@ namespace ImageAfricaProject.Controllers
         }
 
         [Authorize]
-        [HttpPatch("Change-Password")]
+        [HttpPatch("password/change")]
         public async Task<IActionResult> ChangePassword(ChangePasswordDto changePasswordDto)
         {
             var user = await _userRepository.GetCurrentUserAsync();
