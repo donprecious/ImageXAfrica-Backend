@@ -5,6 +5,17 @@
     <UserSecretsId>aspnet-ImageAfricaProject-7CF04A1D-A715-4343-9235-2D137948E5CC</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Templates\EmailNotificationTemplate.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Templates\EmailNotificationTemplate.html">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
@@ -36,6 +47,11 @@
 
   <ItemGroup>
     <Folder Include="Data\NewFolder\" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Include="wwwroot\Templates\EmailNotificationTemplate.html" />
   </ItemGroup>
 
 </Project>
