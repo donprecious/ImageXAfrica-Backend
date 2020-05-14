@@ -14,7 +14,6 @@ namespace ImageAfricaProject.Services
 
         public string GetEmailTemplate()
         {
-
             var path = _hostingEnvironment.ContentRootPath +Path.DirectorySeparatorChar.ToString();
             string FilePath = path + 
                               $"Templates{Path.DirectorySeparatorChar.ToString()}" +
