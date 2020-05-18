@@ -31,5 +31,5 @@ jobs:
       with:
         app-name: 'imagexafrica'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_5dfbf41cc1f841a58b7ce2b2fd7193a6 }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_d697f27a32154139b6461e5c49b3a3d6 }}
         package: ${{env.DOTNET_ROOT}}/myapp 
