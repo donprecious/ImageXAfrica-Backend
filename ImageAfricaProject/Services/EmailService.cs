@@ -29,7 +29,9 @@ namespace ImageAfricaProject.Services
             {
                 using (var smtp = new MailKit.Net.Smtp.SmtpClient())
                 {
+                    
                     await smtp.ConnectAsync(SmtpServer, SmtpPort);
+                    var isSecure = smtp.IsSecure;
                     await smtp.AuthenticateAsync(SmtpUsername, SmtpPassword);
                     await smtp.SendAsync(message);
                     //await smtp.DisconnectAsync(true);
