@@ -10,7 +10,7 @@ namespace ImageAfricaProject.Services
     public class BlobStorageService
     {
         private string connectionString =
-            "DefaultEndpointsProtocol=https;AccountName=imagexstore;AccountKey=Rmao56eeRser6lzlvMumJ1dM/FY+yqTqS1CpU2r1PV1Xdh3L1Rhz2AHP9BKgdb1NmLJiE745MtUKw6fj766ZKA==;EndpointSuffix=core.windows.net";
+            "DefaultEndpointsProtocol=https;AccountName=tefstorage;AccountKey=d4IcS8AnnBvy4t+wTb7v3FD1ImHKR+LN4YZylSKlRAFMgPWOTrYbvpVXQ49xPHrNRmRgg9eOUEnjyNYZaZbXug==;EndpointSuffix=core.windows.net";
 
         public string UploadFileToBlob(string strFileName, byte[] fileData, string fileMimeType)
         {

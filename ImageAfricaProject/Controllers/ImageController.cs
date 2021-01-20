@@ -60,9 +60,21 @@ namespace ImageAfricaProject.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(string categoryId = "", string title = "")
         {
-            var images = await _imageRepository.GetAll().Include(a=>a.Category)
+            var imagesQuery =  _imageRepository.GetAll();
+            if (!string.IsNullOrEmpty(categoryId))
+            {
+                
+                imagesQuery = imagesQuery.Where(a => a.CategoryId == Convert.ToInt32(categoryId));
+            }
+            if (!string.IsNullOrEmpty(title))
+            {
+                imagesQuery = imagesQuery.Where(a => a.Name.Contains(title) || a.ImageTag.Any(c => c.Tag.Name.Contains(title)));
+            }
+          
+            var images = await imagesQuery     .Include(a=>a.Category)
+
                 .Include(a=>a.User)
                 .Include(a=>a.ImageTag).
                     ThenInclude(tg=>tg.Tag)
